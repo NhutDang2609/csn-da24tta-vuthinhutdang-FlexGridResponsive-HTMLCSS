@@ -1,120 +1,220 @@
+/* =====================================================
+   TIỆM CỦA BƠ - sp.css (trang Sản Phẩm)
+   Đề tài: CSS Flexbox, CSS Grid và Responsive Web Design
+   ===================================================== */
+
+/* ---------- 1. Reset (thay cho Bootstrap) ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+body, h2, h6, p { margin: 0; }
+img { max-width: 100%; display: block; }
+
+/* ---------- 2. FLEXBOX: khung trang ----------
+   body là flex column, <main> có flex: 1 nên footer luôn sát đáy. */
 body {
   background-color: #FAF6F1;
   color: #5C4A3A;
   font-family: Arial, sans-serif;
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
+main { flex: 1; }
+
+/* ---------- 3. GRID: thanh điều hướng 3 cột ----------
+   Trái (logo) | giữa (menu) | phải (nút Kho ẩn) */
 nav {
   background-color: #E8D5C4;
   padding: 14px 28px;
-  position: relative;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   border-bottom: 3px solid #D4B89A;
 }
 
 .nav-brand {
-  font-size: 24px;
+  justify-self: start;
+  font-size: 1.5rem;
   font-weight: bold;
-  color: #5C4A3A;
   letter-spacing: 1px;
+  color: #5C4A3A;
   text-decoration: none;
 }
 
-.nav-links {
-  display: flex;
-  gap: 6px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
+/* FLEXBOX: xếp các link theo hàng ngang */
+.nav-links { display: flex; gap: 6px; }
 
-.spacer { width: 200px; }
-
-nav a {
+.nav-links a {
   color: #5C4A3A;
   text-decoration: none;
   font-weight: bold;
-  font-size: 15px;
+  font-size: 0.95rem;
   padding: 6px 14px;
   border-radius: 6px;
   transition: background 0.2s;
 }
 
-nav a:hover, nav a.active {
-  background-color: #F5EDE4;
+.nav-links a:hover,
+.nav-links a.active { background-color: #F5EDE4; }
+
+/* ---------- 4. Nút (thay cho class .btn của Bootstrap) ---------- */
+.btn {
+  display: inline-block;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
+.btn-block { display: block; width: 100%; }
+
+.btn-detail {
+  background-color: #E8D5C4;
+  color: #5C4A3A;
+  border: none;
+  margin-bottom: 8px;
+}
+.btn-detail:hover { background-color: #F5EDE4; }
+
+.btn-danger {
+  background: transparent;
+  color: #c0636b;
+  border: 1px solid #c0636b;
+  font-weight: bold;
+}
+.btn-danger:hover { background-color: #fff0f0; }
+
+.btn-kho { 
+  font-size: 0.75rem; 
+  padding: 4px 10px; 
+  justify-self: auto; 
+  align-self: flex-start; 
+}
+.btn-add {
+  background-color: #E8D5C4;
+  color: #5C4A3A;
+  border: none;
+  font-size: 1rem;
+  padding: 0.375rem 0.75rem;
+}
+
+/* ---------- 5. Tiêu đề trang ---------- */
 h2 {
   text-align: center;
   padding: 36px 20px 10px;
-  font-size: 22px;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);   /* chữ co giãn mượt */
   font-weight: bold;
   color: #6B4F4F;
   border-bottom: 2px solid #F7C5CC;
   margin: 0 28px 20px;
 }
 
-.btn-outline-secondary {
-  background-color: #E8D5C4;
-  color: #5C4A3A;
-  border: none;
+/* ---------- 6. GRID: lưới sản phẩm ----------
+   Điện thoại 2 cột -> máy tính bảng 3 cột -> máy tính 4 cột. */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  padding: 0 12px 24px;
+  margin-top: 3rem;
+}
+
+/* FLEXBOX: thẻ sản phẩm xếp dọc, các thẻ cùng hàng cao bằng nhau */
+.card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.175);
   border-radius: 6px;
-  font-size: 14px;
-  transition: background 0.2s;
+  overflow: hidden;
 }
 
-.btn-outline-secondary:hover {
-  background-color: #F5EDE4;
-  color: #5C4A3A;
+.card-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;      /* ảnh lấp đầy khung, không bị méo */
 }
 
-.btn-outline-danger {
-  color: #c0636b;
-  border-color: #c0636b;
+.card-body { flex: 1; padding: 1rem; }
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.card-price {
+  color: #dc3545;
   font-weight: bold;
-  border-radius: 6px;
-  font-size: 14px !important;
-  transition: background 0.2s;
+  margin-bottom: 1rem;
 }
 
-.btn-outline-danger:hover {
-  background-color: #fff0f0;
-  color: #c0636b;
+/* FLEXBOX: căn giữa nút thêm sản phẩm */
+.add-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0;
 }
 
+/* ---------- 7. FLEXBOX: footer ---------- */
 footer {
   background-color: #E8D5C4;
   border-top: 3px solid #D4B89A;
-  margin-top: auto;
 }
 
 .footer-inner {
-  padding: 20px 28px 14px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 20px;
   flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px 28px 14px;
 }
 
-.footer-brand { font-weight: bold; font-size: 17px; color: #5C4A3A; margin-bottom: 4px; }
-.footer-sub { font-size: 12px; color: #9C8070; }
-.footer-links { display: flex; gap: 16px; align-items: center; }
-.footer-links a { color: #5C4A3A; text-decoration: none; font-size: 13px; }
+.footer-brand { font-weight: bold; font-size: 1.05rem; margin-bottom: 4px; }
+.footer-sub { font-size: 0.75rem; color: #9C8070; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.footer-links a { color: #5C4A3A; text-decoration: none; font-size: 0.8rem; }
 .footer-links a:hover { text-decoration: underline; }
 
 .footer-bottom {
   background-color: #D4B89A;
   padding: 8px 28px;
-  font-size: 12px;
-  color: #5C4A3A;
+  font-size: 0.75rem;
   text-align: center;
 }
 
+/* =====================================================
+   8. RESPONSIVE: 3 mức thiết bị
+   ===================================================== */
+   /* Máy tính bảng: 769px - 991px -> 3 cột */
+@media (min-width: 769px) {
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+}
+ 
+/* Máy tính: từ 992px -> 4 cột */
+@media (min-width: 992px) {
+  .product-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Máy tính bảng */
+@media (max-width: 1024px) {
+  nav { padding: 12px 20px; }
+  .nav-brand { font-size: 1.25rem; }
+  .nav-links a { font-size: 0.875rem; padding: 6px 10px; }
+  .login-bar { font-size: 0.8rem; }
+
+  .deco { gap: 16px; padding: 16px 20px 32px; }
+  .deco figure img { height: 200px; }
+}
 
 @media (max-width: 768px) {
 
@@ -127,7 +227,6 @@ footer {
 
   .nav-brand {
     font-size: 16px;
-    width: 100%;
   }
 
   .nav-links {
@@ -144,20 +243,37 @@ footer {
     padding: 4px 8px;
   }
 
-  nav > .btn-outline-danger {
-    font-size: 12px;
-    padding: 4px 10px;
-    width: 100%;
-    text-align: center;
+  .container {
+    width: 95%;
+    margin: 20px auto;
   }
 
-  h2 {
-    font-size: 18px;
-    margin: 0 14px 16px;
+  #frmLogin {
+    width: 100%;
+    padding: 20px 16px;
+  }
+
+  .form-group input {
+    width: 100%;
+  }
+
+  .button {
+    width: 48%;
   }
 
   .footer-links {
     flex-wrap: wrap;
     gap: 10px;
   }
+
+
+  .nav-brand { font-size: 1rem; width: 100%; }
+  .nav-links { flex-wrap: wrap; width: 100%; gap: 4px; }
+  .nav-links a { font-size: 0.75rem; padding: 4px 8px; }
+
+  .btn-kho { font-size: 0.75rem; padding: 4px 10px; width: 100%; }
+
+  h2 { margin: 0 14px 16px; }
+
+  .footer-links { gap: 10px; }
 }

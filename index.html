@@ -5,35 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trang Chủ - Tiệm của Bơ</title>
   <style>
-/* =====================================================
-   TIỆM CỦA BƠ - style.css
-   Đề tài: CSS Flexbox, CSS Grid và Responsive Web Design
-   ===================================================== */
-
-/* ---------- 1. Reset và biến màu ---------- */
-*, *::before, *::after { box-sizing: border-box; }
-body, h1, h2, h3, p, figure { margin: 0; }
-img { max-width: 100%; display: block; }
-
-:root {
-  --bg: #FAF6F1;
-  --text: #5C4A3A;
-  --text-light: #9C8070;
-  --nav-bg: #E8D5C4;
-  --border: #D4B89A;
-  --hover: #F5EDE4;
-  --top-bar: #EDE0D4;
-  --container: 1100px;
+/* ===== 1. Reset ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* ---------- 2. FLEXBOX: khung trang ----------
-   body là flex column: <main> chiếm phần trống (flex: 1)
-   nên footer luôn nằm sát đáy màn hình. */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ===== 2. Khung trang (Flexbox) ===== */
 body {
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: #FAF6F1;
+  color: #5C4A3A;
   font-family: Arial, sans-serif;
-  font-size: 1rem;
   line-height: 1.6;
   min-height: 100vh;
   display: flex;
@@ -42,46 +30,48 @@ body {
 
 main { flex: 1; }
 
-.top-bar { background-color: var(--top-bar); height: 4px; }
+.top-bar {
+  background-color: #EDE0D4;
+  height: 4px;
+}
 
-/* ---------- 3. GRID: thanh điều hướng 3 cột ----------
-   1fr auto 1fr = trái | giữa (vừa nội dung) | phải
-   Cột giữa luôn nằm chính giữa mà không cần position/transform. */
+/* ===== 3. Thanh điều hướng (Grid 3 cột) ===== */
 nav {
-  background-color: var(--nav-bg);
+  background-color: #E8D5C4;
   padding: 14px 28px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  border-bottom: 3px solid var(--border);
+  border-bottom: 3px solid #D4B89A;
 }
 
 .nav-brand {
   justify-self: start;
   font-size: 1.5rem;
   font-weight: bold;
-  letter-spacing: 1px;
-  color: var(--text);
+  color: #5C4A3A;
   text-decoration: none;
 }
 
-/* FLEXBOX: xếp các link theo hàng ngang */
-.nav-links { display: flex; gap: 6px; }
+.nav-links {
+  display: flex;
+  gap: 6px;
+}
 
 .nav-links a {
-  color: var(--text);
+  color: #5C4A3A;
   text-decoration: none;
   font-weight: bold;
   font-size: 0.95rem;
   padding: 6px 14px;
   border-radius: 6px;
-  transition: background 0.2s;
 }
 
 .nav-links a:hover,
-.nav-links a.active { background-color: var(--hover); }
+.nav-links a.active {
+  background-color: #F5EDE4;
+}
 
-/* FLEXBOX: icon và chữ đăng nhập cùng hàng, căn giữa theo chiều dọc */
 .login-bar {
   justify-self: end;
   display: flex;
@@ -91,11 +81,16 @@ nav {
 }
 
 .login-bar img { width: 24px; height: 24px; }
-.login-bar a { color: var(--text); font-weight: bold; text-decoration: none; }
+
+.login-bar a {
+  color: #5C4A3A;
+  font-weight: bold;
+  text-decoration: none;
+}
+
 .login-bar a:hover { text-decoration: underline; }
 
-/* ---------- 4. FLEXBOX: banner ảnh chạy (CSS thuần) ----------
-   Chiều cao co giãn theo màn hình bằng clamp(min, ưu tiên, max). */
+/* ===== 4. Banner ảnh chạy ===== */
 .slider {
   width: 100%;
   height: clamp(200px, 35vw, 420px);
@@ -124,47 +119,47 @@ nav {
   100%     { transform: translateX(0); }
 }
 
-/* ---------- 5. Lời chào ---------- */
+/* ===== 5. Lời chào ===== */
 .hero {
   text-align: center;
   padding: 32px 20px 16px;
 }
 
 .hero h3 {
-  font-size: clamp(1.05rem, 2.5vw, 1.4rem);  /* chữ co giãn mượt */
-  color: var(--text);
+  font-size: clamp(1.05rem, 2.5vw, 1.4rem);
   margin-bottom: 8px;
 }
 
-.hero p { font-size: 0.95rem; color: var(--text-light); }
+.hero p {
+  font-size: 0.95rem;
+  color: #9C8070;
+}
 
-/* ---------- 6. GRID: lưới danh mục tự động ----------
-   auto-fit + minmax: mỗi cột rộng tối thiểu 420px (hoặc 100% nếu màn hình hẹp).
-   Container tối đa 1100px nên desktop ra 2 cột, màn hình nhỏ tự xuống 1 cột
-   mà không cần viết thêm media query. */
+/* ===== 6. Danh mục sản phẩm (Grid) ===== */
 .deco {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
   gap: 20px;
-  max-width: var(--container);
-  margin-inline: auto;
+  max-width: 1100px;
+  margin: 0 auto;
   padding: 20px 28px 40px;
 }
 
 .deco figure {
-  background: #fff;
-  border: 1px solid var(--border);
+  background-color: #fff;
+  border: 1px solid #D4B89A;
   border-radius: 10px;
   overflow: hidden;
-  transition: box-shadow 0.2s;
 }
 
-.deco figure:hover { box-shadow: 0 4px 12px rgba(212, 184, 154, 0.5); }
+.deco figure:hover {
+  box-shadow: 0 4px 12px rgba(212, 184, 154, 0.5);
+}
 
 .deco figure img {
   width: 100%;
   height: 220px;
-  object-fit: cover;   /* ảnh lấp đầy khung, không bị méo */
+  object-fit: cover;
 }
 
 .deco figcaption {
@@ -173,15 +168,17 @@ nav {
   font-weight: bold;
 }
 
-.deco figcaption a { color: var(--text); text-decoration: none; }
+.deco figcaption a {
+  color: #5C4A3A;
+  text-decoration: none;
+}
+
 .deco figcaption a:hover { text-decoration: underline; }
 
-/* ---------- 7. FLEXBOX: footer ----------
-   justify-content: space-between đẩy 2 khối ra hai đầu,
-   flex-wrap: wrap cho phép xuống dòng khi hẹp. */
+/* ===== 7. Footer (Flexbox) ===== */
 footer {
-  background-color: var(--nav-bg);
-  border-top: 3px solid var(--border);
+  background-color: #E8D5C4;
+  border-top: 3px solid #D4B89A;
 }
 
 .footer-inner {
@@ -193,26 +190,51 @@ footer {
   padding: 20px 28px 14px;
 }
 
-.footer-brand { font-weight: bold; font-size: 1.05rem; margin-bottom: 4px; }
-.footer-sub { font-size: 0.75rem; color: var(--text-light); }
+.footer-brand {
+  font-weight: bold;
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+}
 
-.footer-links { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
-.footer-links a { color: var(--text); text-decoration: none; font-size: 0.8rem; }
+.footer-sub {
+  font-size: 0.75rem;
+  color: #9C8070;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.footer-links a {
+  color: #5C4A3A;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
 .footer-links a:hover { text-decoration: underline; }
 
 .footer-bottom {
-  background-color: var(--border);
+  background-color: #D4B89A;
   padding: 8px 28px;
   font-size: 0.75rem;
   text-align: center;
 }
 
-/* =====================================================
-   8. RESPONSIVE: 3 mức thiết bị
-   Khối lớn viết trước, khối nhỏ viết sau (max-width).
-   ===================================================== */
+/* ===== 8. Responsive ===== */
+/* Máy tính bảng: 769px - 991px -> 3 cột */
+@media (min-width: 769px) {
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+}
+ 
+/* Máy tính: từ 992px -> 4 cột */
+@media (min-width: 992px) {
+  .product-grid { grid-template-columns: repeat(4, 1fr); }
+}
 
-/* Máy tính bảng: ≤ 1024px */
+/* Máy tính bảng */
 @media (max-width: 1024px) {
   nav { padding: 12px 20px; }
   .nav-brand { font-size: 1.25rem; }
@@ -223,9 +245,8 @@ footer {
   .deco figure img { height: 200px; }
 }
 
-/* Điện thoại: ≤ 768px */
+/* Điện thoại */
 @media (max-width: 768px) {
-  /* Đổi nav từ Grid 3 cột sang Flexbox xếp dọc */
   nav {
     display: flex;
     flex-direction: column;
@@ -243,8 +264,7 @@ footer {
 
   .footer-links { gap: 10px; }
 }
-
-  </style>
+</style>
 </head>
 <body>
 

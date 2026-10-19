@@ -149,6 +149,29 @@ footer {
   text-align: center;
 }
 
+/* Máy tính bảng: 769px - 991px -> 3 cột */
+@media (min-width: 769px) {
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+}
+ 
+/* Máy tính: từ 992px -> 4 cột */
+@media (min-width: 992px) {
+  .product-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Máy tính bảng */
+@media (max-width: 1024px) {
+  nav { padding: 12px 20px; }
+  .nav-brand { font-size: 1.25rem; }
+  .nav-links a { font-size: 0.875rem; padding: 6px 10px; }
+  .login-bar { font-size: 0.8rem; }
+
+  .deco { gap: 16px; padding: 16px 20px 32px; }
+  .deco figure img { height: 200px; }
+}
+
+
+  
 @media (max-width: 768px) {
 
   nav {
