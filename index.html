@@ -330,6 +330,99 @@ footer {
   text-align: center;
 }
 
+
+
+
+/* ===== Menu ☰ trên điện thoại ===== */
+.nav-toggle {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.nav-burger { display: none; }
+
+@media (max-width: 860px) {
+  nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0;
+    padding: 8px 14px;
+    position: relative;
+  }
+
+  .nav-brand { font-size: 18px; }
+
+  .nav-burger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    font-size: 26px;
+    line-height: 1;
+    color: #5C4A3A;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-burger::before { content: "\2630"; }
+  .nav-toggle:checked + .nav-burger::before { content: "\2715"; }
+  .nav-burger:hover { background-color: #F5EDE4; }
+  .nav-toggle:focus-visible + .nav-burger { outline: 3px solid #D4B89A; }
+
+  .nav-links,
+  .login-bar { display: none; width: 100%; }
+
+  .nav-toggle:checked ~ .nav-links,
+  .nav-toggle:checked ~ .login-bar { display: flex; }
+
+  .nav-links {
+    position: static;
+    transform: none;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0;
+    margin-top: 6px;
+    border-top: 1px solid #D4B89A;
+  }
+
+  .nav-links a {
+    display: block;
+    width: 100%;
+    padding: 13px 10px;
+    font-size: 15px;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(212, 184, 154, 0.6);
+  }
+
+  .login-bar {
+    justify-self: auto;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 10px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  input:not([type="radio"]):not([type="checkbox"]),
+  select,
+  textarea { font-size: 16px !important; }
+}
+
+
+
+
+
 /* ===== 8. Responsive ===== */
 /* Máy tính bảng: 769px - 991px -> 3 cột */
 @media (min-width: 769px) {
