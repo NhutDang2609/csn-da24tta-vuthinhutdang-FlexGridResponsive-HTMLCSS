@@ -1,0 +1,100 @@
+/* =====================================================================
+   Menu điều hướng responsive — dùng chung cho mọi trang
+   - Màn hình rộng (>860px): giữ nguyên menu như cũ.
+   - Điện thoại / máy tính bảng nhỏ (≤860px): chỉ hiện logo + nút ☰,
+     bấm ☰ thì xổ danh sách xuống (làm bằng CSS thuần, không cần JavaScript).
+   Phải nhúng file này SAU các file CSS khác của trang.
+   ===================================================================== */
+
+/* Ô tích ẩn (giữ lại để dùng bằng bàn phím) và nút ☰ — mặc định không hiện */
+.nav-toggle {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.nav-burger { display: none; }
+
+@media (max-width: 860px) {
+
+  /* Một hàng: logo bên trái, nút ☰ bên phải */
+  nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0;
+    padding: 8px 14px;
+    position: relative;
+  }
+
+  .nav-brand { font-size: 18px; }
+
+  /* Nút ☰ (đổi thành ✕ khi menu đang mở), cao 44px để dễ bấm */
+  .nav-burger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    font-size: 26px;
+    line-height: 1;
+    color: #5C4A3A;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-burger::before { content: "\2630"; }
+  .nav-toggle:checked + .nav-burger::before { content: "\2715"; }
+  .nav-burger:hover { background-color: #F5EDE4; }
+  .nav-toggle:focus-visible + .nav-burger { outline: 3px solid #D4B89A; }
+
+  /* Danh sách liên kết: ẩn, chỉ hiện khi bấm ☰ */
+  .nav-links,
+  .login-bar { display: none; width: 100%; }
+
+  .nav-toggle:checked ~ .nav-links,
+  .nav-toggle:checked ~ .login-bar { display: flex; }
+
+  .nav-links {
+    position: static;
+    transform: none;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0;
+    margin-top: 6px;
+    border-top: 1px solid #D4B89A;
+  }
+
+  /* Mỗi mục cao ≥ 44px */
+  .nav-links a {
+    display: block;
+    width: 100%;
+    padding: 13px 10px;
+    font-size: 15px;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(212, 184, 154, 0.6);
+  }
+
+  /* Dòng "Sign In / Sign Up" (trang chủ) nằm cuối danh sách */
+  .login-bar {
+    justify-self: auto;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 10px;
+    font-size: 15px;
+  }
+}
+
+/* iPhone tự phóng to trang khi bấm vào ô nhập có chữ nhỏ hơn 16px -> đặt 16px trên điện thoại */
+@media (max-width: 768px) {
+  input:not([type="radio"]):not([type="checkbox"]),
+  select,
+  textarea { font-size: 16px !important; }
+}
