@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <title>MUA HÀNG</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style-signin.css">
+    <style>
+      .order-wrap { max-width: 760px; margin: 20px auto; padding: 0 16px; }
+      .order-box { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 20px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+      .order-box h4 { margin: 0 0 14px; }
+      .order-product { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+      .order-product img { width: 180px; max-width: 100%; border-radius: 8px; object-fit: cover; }
+      .order-product .info { flex: 1; min-width: 200px; }
+      .order-price { font-size: 20px; font-weight: bold; color: #c0392b; margin: 8px 0; }
+      .order-row { margin-bottom: 12px; }
+      .order-row label { display: block; font-weight: bold; margin-bottom: 4px; }
+      .order-row input, .order-row textarea { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font: inherit; }
+      .order-total { font-size: 20px; font-weight: bold; text-align: right; }
+      .order-total span { color: #c0392b; }
+      .order-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 14px; }
+      .order-btn { border: none; border-radius: 8px; padding: 10px 22px; font-size: 15px; cursor: pointer; text-decoration: none; display: inline-block; }
+      .order-btn.primary { background: #198754; color: #fff; }
+      .order-btn.secondary { background: #e9ecef; color: #333; }
+      .order-error { color: #dc3545; font-size: 14px; margin-top: 6px; display: none; }
+    </style>
+  </head>
+  <body>
+
+    <nav>
+      <a class="nav-brand" href="../index.html">🌸 Tiệm của Bơ</a>
+      <div class="nav-links">
+        <a href="../index.html">Trang Chủ</a>
+        <a href="gioi-thieu.html">Giới Thiệu</a>
+        <a href="san-pham.html">Sản Phẩm</a>
+        <a href="lien-he.html">Liên Hệ</a>
+      </div>
+    </nav>
+
+    <h3 class="page-title">Mua Hàng</h3>
+
+    <div class="order-wrap" id="orderPage" style="display:none;">
+
+      <!-- Giỏ hàng (chế độ ?cart=1) -->
+      <div class="order-box" id="cartBox" style="display:none;">
+        <h4>🛒 Giỏ hàng của bạn</h4>
+        <div id="cartItems"></div>
+      </div>
+
+      <div class="order-box" id="productBox">
+        <h4>🛍️ Sản phẩm</h4>
+        <div class="order-product">
+          <img id="pImg" src="" alt="">
+          <div class="info">
+            <div id="pName" style="font-size:18px;font-weight:bold;"></div>
+            <div class="order-price" id="pPrice"></div>
+            <p id="pDesc" style="color:#555;"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="order-box">
+        <h4>👤 Thông tin người nhận</h4>
+        <div class="order-row">
+          <label for="oName">Họ tên</label>
+          <input type="text" id="oName">
+        </div>
+        <div class="order-row">
+          <label for="oPhone">Số điện thoại</label>
+          <input type="text" id="oPhone">
+        </div>
+        <div class="order-row">
+          <label for="oAddress">Địa chỉ nhận hàng</label>
+          <textarea id="oAddress" rows="2" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành"></textarea>
+        </div>
+        <div class="order-row" id="rowQty">
+          <label for="oQty">Số lượng</label>
+          <input type="number" id="oQty" min="1" max="99" value="1">
+        </div>
+        <div class="order-row">
+          <label for="oNote">Ghi chú (không bắt buộc)</label>
+          <input type="text" id="oNote">
+        </div>
+        <div class="order-error" id="oError"></div>
+      </div>
+
+      <div class="order-box">
+        <div class="order-total">Tổng tiền: <span id="oTotal"></span></div>
+        <div class="order-actions">
+          <a class="order-btn secondary" href="san-pham.html">Quay lại</a>
+          <button type="button" class="order-btn primary" id="btnOrder">Xác nhận đặt hàng</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="footer-inner">
+        <div>
+          <div class="footer-brand">🌸 Tiệm của Bơ</div>
+          <div class="footer-sub">Mang vẻ đẹp vào không gian sống của bạn</div>
+        </div>
+        <div class="footer-links">
+          <a href="../index.html">Trang Chủ</a>
+          <a href="gioi-thieu.html">Giới Thiệu</a>
+          <a href="san-pham.html">Sản Phẩm</a>
+          <a href="lien-he.html">Liên Hệ</a>
+        </div>
+      </div>
+      <div class="footer-bottom">Trang web được thiết kế bởi Vũ Thị Nhựt Đang @2026</div>
+    </footer>
+
+    <script src="../js/user.js"></script>
+    <script src="../js/lib.js"></script>
+    <script>
+      // Chờ lấy danh sách sản phẩm từ MySQL rồi mới xử lý
+      productReady.then(function () {
+        if (typeof UserLib === "undefined") {
+          alert("Không tải được file user.js!\nHãy kiểm tra file có nằm ở thư mục js/ (cùng cấp với thư mục css/) và tên đúng là user.js.");
+          return;
+        }
+
+        // Chưa đăng nhập -> chuyển sang trang đăng nhập (đăng nhập xong quay lại đây)
+        UserLib.requireLogin();
+        const user = UserLib.getCurrentUser();
+        if (!user) return;
+        UserLib.renderNavUser();
+
+        const $ = function (i) { return document.getElementById(i); };
+        const money = function (n) { return n.toLocaleString("vi-VN") + " VND"; };
+        const params = new URLSearchParams(window.location.search);
+        const cartMode = params.get("cart") === "1";   // thanh toán cả giỏ hàng
+
+        function thoat(tieuDe, noiDung) {
+          UserLib.popup({
+            type: "error",
+            title: tieuDe,
+            text: noiDung,
+            buttonText: "Về trang sản phẩm",
+            onClose: function () { window.location.href = "san-pham.html"; },
+          });
+        }
+
+        // ----- Danh sách hàng cần mua: [{product, qty}] -----
+        let cartItems = [];   // dùng cho chế độ giỏ hàng
+        let product = null;   // dùng cho chế độ mua 1 sản phẩm
+
+        if (cartMode) {
+          // Giỏ hàng lưu dạng chuỗi "14,14,5" (không dùng JSON)
+          const chuoi = localStorage.getItem("shopCart") || "";
+          const dem = {};
+          (chuoi === "" ? [] : chuoi.split(",").map(Number)).forEach(function (i) {
+            dem[i] = (dem[i] || 0) + 1;
+          });
+          Object.keys(dem).forEach(function (k) {
+            const p = productDatabase.find(function (x) { return x.id === Number(k); });
+            if (p) cartItems.push({ product: p, qty: dem[k] });
+          });
+          if (cartItems.length === 0) return thoat("Giỏ hàng trống", "Bạn chưa có sản phẩm nào trong giỏ hàng.");
+
+          $("productBox").style.display = "none";
+          $("rowQty").style.display = "none";
+          $("cartBox").style.display = "block";
+          $("cartItems").innerHTML = cartItems.map(function (it) {
+            return "<div style='display:flex;gap:12px;align-items:center;border-bottom:1px solid #eee;padding:8px 0;'>" +
+              "<img src='" + escapeHtml(it.product.img) + "' style='width:60px;height:60px;object-fit:cover;border-radius:8px;'>" +
+              "<div style='flex:1;'><b>" + escapeHtml(it.product.name) + "</b><br><span style='color:#555;'>" +
+              money(it.product.price) + " × " + it.qty + "</span></div>" +
+              "<b style='color:#c0392b;'>" + money(it.product.price * it.qty) + "</b></div>";
+          }).join("");
+        } else {
+          const id = Number(params.get("id"));
+          product = productDatabase.find(function (p) { return p.id === id; });
+          if (!product) return thoat("Không tìm thấy sản phẩm", "Sản phẩm bạn chọn không tồn tại.");
+
+          $("pImg").src = product.img;
+          $("pImg").alt = product.name;
+          $("pName").textContent = product.name;
+          $("pPrice").textContent = money(product.price);
+          $("pDesc").textContent = product.desc;
+        }
+
+        $("oName").value = user.hoTen;
+        $("oPhone").value = user.dienThoai;
+        $("orderPage").style.display = "block";
+
+        function qty() {
+          const q = parseInt($("oQty").value, 10);
+          return q > 0 ? q : 1;
+        }
+        // Danh sách hàng thực tế sẽ đặt
+        function items() {
+          return cartMode ? cartItems : [{ product: product, qty: qty() }];
+        }
+        function tongTien() {
+          return items().reduce(function (t, it) { return t + it.product.price * it.qty; }, 0);
+        }
+        function updateTotal() { $("oTotal").textContent = money(tongTien()); }
+        $("oQty").addEventListener("input", updateTotal);
+        updateTotal();
+
+        function showError(msg) {
+          const e = $("oError");
+          e.textContent = msg;
+          e.style.display = "block";
+        }
+
+        $("btnOrder").addEventListener("click", function () {
+          const name = $("oName").value.trim();
+          const phone = $("oPhone").value.trim();
+          const address = $("oAddress").value.trim();
+
+          if (name.length < 2) return showError("Vui lòng nhập họ tên.");
+          if (!/^0\d{9}$/.test(phone)) return showError("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.");
+          if (address.length < 5) return showError("Vui lòng nhập địa chỉ nhận hàng.");
+          $("oError").style.display = "none";
+
+          const list = items();
+          const total = tongTien();
+          const soLuong = list.reduce(function (t, it) { return t + it.qty; }, 0);
+
+          // Lưu đơn hàng vào localStorage (mỗi thông tin một khóa, không dùng JSON)
+          const orderId = Date.now();
+          const order = {
+            email: user.email,
+            hoTen: name,
+            dienThoai: phone,
+            diaChi: address,
+            ghiChu: $("oNote").value.trim(),
+            sanPhamId: list.map(function (it) { return it.product.id; }).join(","),
+            sanPham: list.map(function (it) { return it.product.name + " x" + it.qty; }).join("; "),
+            soLuong: soLuong,
+            tongTien: total,
+            ngayDat: new Date().toISOString(),
+          };
+          Object.keys(order).forEach(function (k) {
+            localStorage.setItem("tiembo_order|" + orderId + "|" + k, order[k]);
+          });
+
+          // Thanh toán cả giỏ xong thì làm trống giỏ hàng
+          if (cartMode) localStorage.setItem("shopCart", "");
+
+          UserLib.popup({
+            type: "success",
+            title: "Đặt hàng thành công!",
+            text: "Cảm ơn " + name + "! Đơn hàng gồm " + soLuong + " sản phẩm, tổng " + money(total) + " đã được ghi nhận.",
+            buttonText: "Tiếp tục mua sắm",
+            onClose: function () { window.location.href = "san-pham.html"; },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

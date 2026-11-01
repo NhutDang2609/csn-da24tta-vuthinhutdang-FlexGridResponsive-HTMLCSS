@@ -7,7 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="../css/style-sp.css">
-  <script src="../js/lib.js"></script>  
+  <script src="../js/user.js"></script>
+  <script src="../js/lib.js"></script>
 </head>
 <body>
 <nav>
@@ -16,58 +17,201 @@
     <a href="../index.html">Trang Chủ</a>
     <a href="gioi-thieu.html">Giới Thiệu</a>
     <a href="san-pham.html" class="active">Sản Phẩm</a>
-    
+
     <a href="lien-he.html">Liên Hệ</a>
 
   </div>
-    <a href="kho.html" class="btn btn-outline-danger"> Kho ẩn</a>
+  <div class="nav-user"></div>
 </nav>
 
 <h2>Sản Phẩm</h2>
 
 <div class="container-fluid mt-5">
+  <!-- Thanh tìm kiếm -->
+  <form method="get" action="san-pham.html" class="d-flex justify-content-center gap-2 mb-3">
+    <input type="search" id="search-input" name="q" class="form-control" style="max-width:420px;" placeholder="Tìm sản phẩm...">
+    <button type="submit" class="btn btn-outline-secondary">Tìm</button>
+  </form>
+  <div id="search-info" class="text-center mb-3" style="display:none;"></div>
+
+  <!-- Bộ lọc sản phẩm -->
+  <div id="filter-bar" class="d-flex flex-wrap justify-content-center align-items-center gap-2 mb-2">
+    <select id="f-cat" class="form-select" style="max-width:190px;" aria-label="Danh mục"></select>
+    <select id="f-price" class="form-select" style="max-width:210px;" aria-label="Khoảng giá">
+      <option value="">Mọi mức giá</option>
+      <option value="duoi200">Dưới 200.000đ</option>
+      <option value="200-1000">200.000đ – 1.000.000đ</option>
+      <option value="1000-3000">1.000.000đ – 3.000.000đ</option>
+      <option value="tren3000">Trên 3.000.000đ</option>
+    </select>
+    <select id="f-sort" class="form-select" style="max-width:190px;" aria-label="Sắp xếp">
+      <option value="">Sắp xếp mặc định</option>
+      <option value="gia-tang">Giá thấp → cao</option>
+      <option value="gia-giam">Giá cao → thấp</option>
+      <option value="ten">Tên A → Z</option>
+    </select>
+    <button type="button" id="f-reset" class="btn btn-outline-secondary">Xóa bộ lọc</button>
+  </div>
+  <div id="filter-count" class="text-center text-muted mb-3"></div>
+
   <div id="product-list" class="product-grid"></div>
 </div>
 
 <script>
-  const chuoi = localStorage.getItem("shopDeletedIds") || "";
-  const deletedIds = chuoi === "" ? [] : chuoi.split(",").map(Number);
-
+  // Người dùng chỉ có 2 nút: "Xem chi tiết" và "Mua ngay".
+  // Thêm / sửa / xóa sản phẩm do quản trị viên làm ở trang quan-tri.html.
   const container = document.getElementById("product-list");
   container.className = "row";
 
-  const visible = productDatabase.filter(p => !deletedIds.includes(p.id));
+  // ===== Bộ lọc =====
+  const PRICE_FILTERS = {
+    "duoi200":   (p) => p < 200000,
+    "200-1000":  (p) => p >= 200000 && p <= 1000000,
+    "1000-3000": (p) => p > 1000000 && p <= 3000000,
+    "tren3000":  (p) => p > 3000000,
+  };
+  const SORTERS = {
+    "gia-tang": (a, b) => a.price - b.price,
+    "gia-giam": (a, b) => b.price - a.price,
+    "ten":      (a, b) => a.name.localeCompare(b.name, "vi"),
+  };
 
-  visible.forEach(product => {
-    const col = document.createElement("div");
-    col.className = "col-6 col-md-4 col-lg-3 mb-4";
-    col.innerHTML = `
-      <div class="card h-100">
-        <img src="${product.img}" class="card-img-top" style="height:180px; object-fit:cover;">
-        <div class="card-body">
-          <h6 class="card-title">${product.name}</h6>
-          <p class="card-text text-danger fw-bold">${product.price.toLocaleString()} VND</p>
-          <a href="chi-tiet.html?id=${product.id}" class="btn btn-sm btn-outline-secondary w-100 mb-2">Xem chi tiết</a>
-          <button onclick="xoaSanPham(${product.id}, this)" class="btn btn-sm btn-outline-danger w-100">Xóa</button>
-        </div>
-      </div>`;
-    container.appendChild(col);
+  const fCat = document.getElementById("f-cat");
+  const fPrice = document.getElementById("f-price");
+  const fSort = document.getElementById("f-sort");
+
+  // Đổ danh sách danh mục (chỉ hiện "Khác" nếu thật sự có sản phẩm thuộc mục đó)
+  function napDanhMuc() {
+    fCat.innerHTML = "<option value=''>Tất cả danh mục</option>";
+    Object.keys(CATEGORIES).forEach(function (key) {
+      if (key === "khac" && !productDatabase.some(p => p.category === "khac")) return;
+      const o = document.createElement("option");
+      o.value = key;
+      o.textContent = CATEGORIES[key];
+      fCat.appendChild(o);
+    });
+  }
+
+  // Lấy lại lựa chọn từ địa chỉ trang, ví dụ san-pham.html?cat=ban&price=duoi200&sort=gia-tang
+  function docBoLocTuUrl() {
+    const sp = new URLSearchParams(window.location.search);
+    const gan = (sel, val) => { if ([...sel.options].some(o => o.value === val)) sel.value = val; };
+    gan(fCat, sp.get("cat") || "");
+    gan(fPrice, sp.get("price") || "");
+    gan(fSort, sp.get("sort") || "");
+  }
+
+  // Ghi lựa chọn lên địa chỉ trang (tải lại trang vẫn giữ nguyên bộ lọc)
+  function ghiBoLocLenUrl() {
+    try {
+      const url = new URL(window.location.href);
+      [["cat", fCat.value], ["price", fPrice.value], ["sort", fSort.value]].forEach(function (kv) {
+        if (kv[1]) url.searchParams.set(kv[0], kv[1]); else url.searchParams.delete(kv[0]);
+      });
+      window.history.replaceState(null, "", url);
+    } catch (e) { /* mở bằng file:// thì bỏ qua */ }
+  }
+
+  function xoaBoLoc() {
+    fCat.value = "";
+    fPrice.value = "";
+    fSort.value = "";
+    hienThiSanPham();
+  }
+
+  function hienThiSanPham() {
+    // Tìm kiếm: san-pham.html?q=tu-khoa
+    const tuKhoa = (new URLSearchParams(window.location.search).get("q") || "").trim();
+    let visible = productDatabase.slice();
+    if (tuKhoa !== "") {
+      visible = visible.filter(p => matchKeyword(p.name, tuKhoa));
+    }
+    const tongSauTimKiem = visible.length;
+
+    // Lọc theo danh mục, khoảng giá rồi sắp xếp
+    if (fCat.value) visible = visible.filter(p => p.category === fCat.value);
+    if (fPrice.value) visible = visible.filter(p => PRICE_FILTERS[fPrice.value](p.price));
+    if (fSort.value) visible.sort(SORTERS[fSort.value]);
+    ghiBoLocLenUrl();
+
+    // Thông báo kết quả tìm kiếm
+    const info = document.getElementById("search-info");
+    if (tuKhoa !== "") {
+      info.textContent = "";
+      const t = document.createElement("span");
+      t.textContent = tongSauTimKiem > 0
+        ? "Kết quả cho “" + tuKhoa + "”: " + tongSauTimKiem + " sản phẩm. "
+        : "Không tìm thấy sản phẩm nào cho “" + tuKhoa + "”. ";
+      const a = document.createElement("a");
+      a.href = "san-pham.html";
+      a.textContent = "Xem tất cả sản phẩm";
+      info.append(t, a);
+      info.style.display = "block";
+    }
+    document.getElementById("search-input").value = tuKhoa;
+
+    // Số sản phẩm đang hiển thị
+    const dangLoc = fCat.value || fPrice.value;
+    document.getElementById("filter-count").textContent =
+      dangLoc ? "Hiển thị " + visible.length + " / " + tongSauTimKiem + " sản phẩm" : "";
+
+    container.innerHTML = "";
+    if (visible.length === 0) {
+      container.innerHTML = tongSauTimKiem === 0 && tuKhoa === ""
+        ? "<p class='text-center'>Hiện chưa có sản phẩm nào.</p>"
+        : (dangLoc ? "<p class='text-center'>Không có sản phẩm nào phù hợp với bộ lọc. Hãy thử bỏ bớt điều kiện lọc.</p>" : "");
+    }
+
+    visible.forEach(product => {
+      const col = document.createElement("div");
+      col.className = "col-6 col-md-4 col-lg-3 mb-4";
+      col.innerHTML = `
+        <div class="card h-100">
+          <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" class="card-img-top" style="height:180px; object-fit:cover;">
+          <div class="card-body">
+            <h6 class="card-title">${escapeHtml(product.name)}</h6>
+            <p class="card-text text-danger fw-bold">${product.price.toLocaleString()} VND</p>
+            <a href="chi-tiet.html?id=${product.id}" class="btn btn-sm btn-outline-secondary w-100 mb-2">Xem chi tiết</a>
+            <button onclick="buyNow(${product.id})" class="btn btn-sm btn-danger w-100">Mua ngay</button>
+          </div>
+        </div>`;
+      container.appendChild(col);
+    });
+  }
+
+  [fCat, fPrice, fSort].forEach(el => el.addEventListener("change", hienThiSanPham));
+  document.getElementById("f-reset").addEventListener("click", xoaBoLoc);
+
+  // Hiển thị sản phẩm khi dữ liệu đã sẵn sàng
+  productReady.then(function () {
+    napDanhMuc();
+    docBoLocTuUrl();
+    hienThiSanPham();
   });
 
-  function xoaSanPham(id, btn) {
-    if (!confirm("Xóa sản phẩm này?")) return;
-    deletedIds.push(id);
-    localStorage.setItem("shopDeletedIds", deletedIds.join(","));
-    btn.closest(".col-6").remove();
-  }
+  // Nút "Mua ngay" gọi buyNow(id) trong lib.js:
+  //  - đã đăng nhập  -> sang trang mua-hang.html
+  //  - chưa đăng nhập -> báo và chuyển sang trang đăng nhập
+
+  // Hiện "Xin chào, tên" + Đăng xuất (hoặc "Quản trị" nếu là quản trị viên) trên menu
+  // Đưa "Xin chào / Đăng xuất" sang khung bên phải (.nav-user)
+  (function () {
+    var links = document.querySelector(".nav-links");
+    var box = document.querySelector(".nav-user");
+    var soMucGoc = links.children.length; // 4 mục menu gốc
+    function chuyen() {
+      while (links.children.length > soMucGoc) {
+        box.appendChild(links.children[soMucGoc]);
+      }
+    }
+    new MutationObserver(chuyen).observe(links, { childList: true });
+    if (typeof UserLib !== "undefined") UserLib.renderNavUser();
+    chuyen();
+  })();
 </script>
 
 
-<div class="container text-center my-4">
-  <a href="them.html" class="btn btn-success" style="background-color: #E8D5C4 ;
-  color: #5C4A3A ; 
-  border: none ;"> Thêm sản phẩm</a>
-</div>
+
 
 <footer>
   <div class="footer-inner">
@@ -82,7 +226,7 @@
       <a href="lien-he.html">Liên Hệ</a>
     </div>
   </div>
-  <div class="footer-bottom">Trang web được thiết kế bởi VŨ THỊ NHỰT ĐANG @2026 · HTML tĩnh</div>
+  <div class="footer-bottom">Trang web được thiết kế bởi VŨ THỊ NHỰT ĐANG @2026</div>
 </footer>
 </body>
 </html>

@@ -101,6 +101,162 @@ const productDatabase = [
    
 ];
 
+// ====== SẢN PHẨM DO QUẢN TRỊ VIÊN THÊM / SỬA / XÓA ======
+// Danh sách ở trên là dữ liệu gốc. Khi admin thêm / sửa / xóa, thay đổi được lưu trong
+// localStorage của trình duyệt (mỗi thông tin một khóa, không dùng JSON: name, price, img, desc, category) rồi được
+// ghép vào danh sách này mỗi lần tải trang.
+// ====== DANH MỤC SẢN PHẨM (dùng cho bộ lọc) ======
+// Khớp 4 mục ở trang chủ: decor bàn / tường / phòng / góc học tập.
+const CATEGORIES = {
+  ban: "Decor bàn",
+  tuong: "Decor tường",
+  phong: "Decor phòng",
+  hoctap: "Góc học tập",
+  khac: "Khác",
+};
+
+// Sản phẩm gốc chia theo dãy id; sản phẩm admin thêm sẽ tự chọn danh mục trong trang quản trị
+function categoryOfId(id) {
+  if (id >= 1 && id <= 13) return "hoctap";
+  if (id >= 14 && id <= 25) return "tuong";
+  if (id >= 26 && id <= 37) return "ban";
+  if (id >= 38 && id <= 49) return "phong";
+  return "khac";
+}
+
+const DEFAULT_PRODUCTS = productDatabase.map(function (p) {
+  return Object.assign({}, p, { category: categoryOfId(p.id) });
+});
+const LS_PRODUCT = "tiembo_product|"; // tiembo_product|<id>|<name/price/img/desc>
+const LS_DELETED = "tiembo_deleted";  // danh sách id sản phẩm gốc đã xóa: "3,7,9"
+const LS_NEXTID = "tiembo_nextid";    // số id kế tiếp cho sản phẩm mới
+
+function readDeletedIds() {
+  const s = localStorage.getItem(LS_DELETED) || "";
+  return s === "" ? [] : s.split(",").map(Number);
+}
+
+// Gom các khóa tiembo_product|id|field thành { id: {name, price, img, desc} }
+function readOverrides() {
+  const map = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k || k.indexOf(LS_PRODUCT) !== 0) continue;
+    const parts = k.split("|");
+    const id = Number(parts[1]);
+    if (!id || !parts[2]) continue;
+    (map[id] = map[id] || {})[parts[2]] = localStorage.getItem(k);
+  }
+  return map;
+}
+
+// Ghép dữ liệu quản trị vào productDatabase
+function applyLocalProducts() {
+  try {
+    const deleted = readDeletedIds();
+    const over = readOverrides();
+    const list = DEFAULT_PRODUCTS
+      .filter(function (p) { return !deleted.includes(p.id); })
+      .map(function (p) { return Object.assign({}, p); });
+
+    Object.keys(over).forEach(function (k) {
+      const id = Number(k);
+      const o = over[k];
+      if (deleted.includes(id)) return;
+      let p = list.find(function (x) { return x.id === id; });
+      if (!p) {
+        p = { id: id, name: "", price: 0, img: "", productLink: "chi-tiet.html", desc: "", category: "khac" };
+        list.push(p);
+      }
+      if (o.name !== undefined) p.name = o.name;
+      if (o.price !== undefined) p.price = Number(o.price) || 0;
+      if (o.img !== undefined) p.img = o.img;
+      if (o.desc !== undefined) p.desc = o.desc;
+      if (o.category !== undefined && CATEGORIES[o.category]) p.category = o.category;
+    });
+
+    productDatabase.length = 0; // giữ nguyên mảng để các tham chiếu cũ vẫn dùng được
+    list.forEach(function (p) {
+      if (p.name) productDatabase.push(p);
+    });
+  } catch (e) {
+    console.warn("Không đọc được sản phẩm của quản trị viên:", e.message);
+  }
+}
+
+function nextProductId() {
+  let max = 0;
+  DEFAULT_PRODUCTS.forEach(function (p) { if (p.id > max) max = p.id; });
+  Object.keys(readOverrides()).forEach(function (k) { if (Number(k) > max) max = Number(k); });
+  return Math.max(max + 1, Number(localStorage.getItem(LS_NEXTID)) || 0);
+}
+
+// Quản trị viên: thêm (không có p.id) hoặc sửa (có p.id). Trả về id sản phẩm.
+function saveLocalProduct(p) {
+  const isNew = !p.id;
+  const id = isNew ? nextProductId() : Number(p.id);
+  const fields = {
+    name: p.name,
+    price: String(p.price),
+    img: p.img,
+    desc: p.desc || "",
+    category: CATEGORIES[p.category] ? p.category : "khac",
+  };
+  try {
+    Object.keys(fields).forEach(function (f) {
+      localStorage.setItem(LS_PRODUCT + id + "|" + f, fields[f]);
+    });
+    if (isNew) localStorage.setItem(LS_NEXTID, String(id + 1));
+  } catch (e) {
+    throw new Error("Bộ nhớ trình duyệt đã đầy. Hãy dùng ảnh nhỏ hơn hoặc nhập đường dẫn ảnh có sẵn.");
+  }
+  applyLocalProducts();
+  return id;
+}
+
+// Quản trị viên: xóa sản phẩm
+function deleteLocalProduct(id) {
+  id = Number(id);
+  const remove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.indexOf(LS_PRODUCT + id + "|") === 0) remove.push(k);
+  }
+  remove.forEach(function (k) { localStorage.removeItem(k); });
+
+  // Sản phẩm gốc thì ghi vào danh sách "đã xóa"; sản phẩm admin tự thêm thì xóa hẳn là xong
+  if (DEFAULT_PRODUCTS.some(function (p) { return p.id === id; })) {
+    const d = readDeletedIds();
+    if (!d.includes(id)) d.push(id);
+    localStorage.setItem(LS_DELETED, d.join(","));
+  }
+  applyLocalProducts();
+}
+
+// Quản trị viên: bỏ mọi thay đổi, quay về danh sách sản phẩm gốc
+function resetLocalProducts() {
+  const remove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.indexOf(LS_PRODUCT) === 0) remove.push(k);
+  }
+  remove.forEach(function (k) { localStorage.removeItem(k); });
+  localStorage.removeItem(LS_DELETED);
+  localStorage.removeItem(LS_NEXTID);
+  applyLocalProducts();
+}
+
+applyLocalProducts();
+// Các trang dùng productReady.then(...) — ở chế độ này dữ liệu đã sẵn sàng ngay
+const productReady = Promise.resolve();
+
+// Chống chèn mã HTML khi in tên / mô tả sản phẩm bằng innerHTML
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+
 function addProduct_v2(product) {
   const container = document.getElementById("product-list");
   if (!container) return;
@@ -135,7 +291,17 @@ function addProduct_v2(product) {
 
   myDiv2.appendChild(myP1);
   myDiv2.appendChild(myP2);
+  // Nút MUA NGAY: đã đăng nhập -> sang trang mua hàng, chưa -> sang trang đăng nhập
+  const buyBtn = document.createElement("button");
+  buyBtn.setAttribute("type", "button");
+  buyBtn.setAttribute("class", "btn btn-success ms-2");
+  buyBtn.textContent = "Mua ngay";
+  buyBtn.addEventListener("click", function () {
+    buyNow(product.id);
+  });
+
   myDiv2.appendChild(myLink);
+  myDiv2.appendChild(buyBtn);
   myDiv.appendChild(myDiv2);
   container.appendChild(myDiv);
 }
@@ -144,4 +310,81 @@ function loadProducts(products) {
   for (let i = 0; i < products.length; i++) {
     addProduct_v2(products[i]);
   }
+}
+
+// ====== MUA NGAY ======
+// Kiểm tra đăng nhập trực tiếp từ localStorage (cùng khóa mà user.js lưu),
+// nên nút Mua ngay hoạt động kể cả khi trang chưa nhúng user.js.
+function isLoggedIn() {
+  try {
+    return !!localStorage.getItem("tiembo_session_email");
+  } catch (e) {
+    return false;
+  }
+}
+
+// Đã đăng nhập -> sang trang target. Chưa đăng nhập -> báo rồi sang trang đăng nhập
+// (đăng nhập xong tự quay lại target).
+function goOrLogin(target, message) {
+  if (isLoggedIn()) {
+    window.location.href = target;
+    return;
+  }
+  const loginPage = "sign-in.html?redirect=" + encodeURIComponent(target);
+  const text = message || "Vui lòng đăng nhập để mua hàng.";
+
+  if (typeof UserLib !== "undefined" && UserLib.popup) {
+    UserLib.popup({
+      type: "info",
+      title: "Bạn chưa đăng nhập",
+      text: text,
+      buttonText: "Đăng nhập",
+      onClose: function () {
+        window.location.href = loginPage;
+      },
+    });
+  } else {
+    alert("Bạn chưa đăng nhập. " + text);
+    window.location.href = loginPage;
+  }
+}
+
+// Mua ngay 1 sản phẩm (dùng ở san-pham.html, chi-tiet.html...)
+function buyNow(id) {
+  goOrLogin("mua-hang.html?id=" + id);
+}
+
+// Thanh toán cả giỏ hàng
+function checkoutCart() {
+  goOrLogin("mua-hang.html?cart=1", "Vui lòng đăng nhập để thanh toán.");
+}
+
+
+// ====== TÌM KIẾM SẢN PHẨM ======
+// Bỏ dấu tiếng Việt + chữ thường: "Đèn Học" -> "den hoc"
+function boDau(s) {
+  return String(s)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+}
+
+// true nếu tên chứa TẤT CẢ các từ trong từ khóa (không phân biệt hoa thường, có dấu hay không)
+function matchKeyword(text, keyword) {
+  const t = boDau(text);
+  return boDau(keyword)
+    .split(/\s+/)
+    .filter(Boolean)
+    .every(function (w) {
+      return t.includes(w);
+    });
+}
+
+// Trả về danh sách sản phẩm khớp từ khóa
+function searchProducts(keyword) {
+  return productDatabase.filter(function (p) {
+    return matchKeyword(p.name, keyword);
+  });
 }

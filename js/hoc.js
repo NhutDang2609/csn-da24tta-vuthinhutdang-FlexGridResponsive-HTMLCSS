@@ -1,80 +1,108 @@
+// =====================================================================
+//  Trang danh mục sản phẩm dành cho KHÁCH (ví dụ: Treo Tường)
+// =====================================================================
+// - Không còn danh sách sản phẩm riêng trong file này. Sản phẩm lấy từ lib.js (productDatabase)
+//   và chỉ hiện những sản phẩm thuộc danh mục của trang. Nhờ vậy khi quản trị viên thêm / sửa / xóa
+//   ở trang quan-tri.html thì trang này tự cập nhật.
+// - Khách chỉ có 2 nút: "Xem chi tiết" và "Mua ngay".
+// - Danh mục đọc từ thẻ <body data-category="...">:
+//       tuong = Decor tường | ban = Decor bàn | phong = Decor phòng | hoctap = Góc học tập
+//   Có thể dùng chung file này cho cả 4 trang danh mục, chỉ cần đổi data-category.
+// - Cần nhúng user.js và lib.js TRƯỚC file này.
+(function () {
+  const DANH_MUC = document.body.dataset.category || "hoctap";
 
-
-//hoc
- const productDatabase = [
-  {id:1, name:"Ghế Công Thái Học Manson", price:5000000, img:"../assets/h1.webp", productLink:"chi-tiet.html", desc:"Ghế công thái học cao cấp hỗ trợ tư thế ngồi đúng, giảm áp lực lên cột sống và mang lại sự thoải mái khi học tập, làm việc trong thời gian dài."},
-
-{id:13, name:"Đèn Học Rạng Đông", price:180000, img:"../assets/h2.webp", productLink:"chi-tiet.html", desc:"Đèn học với ánh sáng dịu nhẹ, bảo vệ mắt và giúp tăng khả năng tập trung cho góc học tập hiện đại."},
-
-{id:4, name:"Đèn Học PIXAR", price:160000, img:"../assets/h3.webp", productLink:"chi-tiet.html", desc:"Đèn học thiết kế lấy cảm hứng từ phong cách Pixar, nhỏ gọn, linh hoạt và tạo điểm nhấn độc đáo cho bàn học."},
-
-{id:10, name:"Sổ Tay A5", price:20000, img:"../assets/h4.jpg", productLink:"chi-tiet.html", desc:"Sổ tay A5 tiện dụng với kích thước nhỏ gọn, thích hợp để ghi chú, lập kế hoạch và lưu giữ ý tưởng hằng ngày."},
-
-{id:5, name:"Sổ Da Loxo A4", price:150000, img:"../assets/h5.jpg", productLink:"chi-tiet.html", desc:"Sổ da A4 sang trọng với chất liệu bền đẹp, phù hợp cho công việc, học tập và ghi chép chuyên nghiệp."},
-
-{id:2, name:"Kệ Để Sách", price:100000, img:"../assets/h6.png", productLink:"chi-tiet.html", desc:"Kệ để sách giúp sắp xếp tài liệu gọn gàng, tiết kiệm không gian và mang lại sự ngăn nắp cho góc học tập."},
-
-{id:3, name:"Tai Nghe Bluetooth JBL", price:180000, img:"../assets/h7.webp", productLink:"chi-tiet.html", desc:"Tai nghe Bluetooth cho âm thanh sống động, kết nối ổn định và mang lại trải nghiệm giải trí, học tập tiện lợi."},
-
-{id:7, name:"Lịch Gỗ Để Bàn", price:90000, img:"../assets/h8.jpg", productLink:"chi-tiet.html", desc:"Lịch gỗ để bàn mang phong cách tối giản, vừa hữu ích trong việc quản lý thời gian vừa là món decor đẹp mắt."},
-
-{id:8, name:"Giá Để Laptop", price:800000, img:"../assets/h9.png", productLink:"chi-tiet.html", desc:"Giá đỡ laptop chắc chắn giúp nâng cao màn hình, cải thiện tư thế ngồi và tăng hiệu quả làm việc."},
-
-{id:11, name:"Giá Sách Để Bàn Gỗ", price:500000, img:"../assets/h10.jpg", productLink:"chi-tiet.html", desc:"Giá sách gỗ để bàn thiết kế tinh tế, giúp lưu trữ sách vở và tạo điểm nhấn ấm áp cho không gian học tập."},
-
-{id:6, name:"Cây Mini Để Bàn", price:29000, img:"../assets/h11.jpg", productLink:"chi-tiet.html", desc:"Cây mini để bàn mang đến cảm giác tươi mới, giúp không gian học tập và làm việc trở nên sinh động hơn."},
-
-{id:12, name:"Bút Bi Bấm Nhiều Màu", price:38000, img:"../assets/h12.jpg", productLink:"chi-tiet.html", desc:"Bút bi nhiều màu tiện lợi cho việc ghi chú, học tập và sáng tạo, giúp nội dung trở nên nổi bật và dễ theo dõi."}
-
-];
- 
-
-
-
-
-
-
-function addProduct_v2(product) {
   const container = document.getElementById("product-list");
-  if (!container) return;
+  const fPrice = document.getElementById("f-price");
+  const fSort = document.getElementById("f-sort");
+  container.className = "row";
 
-  const myDiv = document.createElement("div");
-  myDiv.setAttribute("class", "product-item col-sm-4 mb-4");
+  const PRICE_FILTERS = {
+    "duoi200":   (p) => p < 200000,
+    "200-1000":  (p) => p >= 200000 && p <= 1000000,
+    "1000-3000": (p) => p > 1000000 && p <= 3000000,
+    "tren3000":  (p) => p > 3000000,
+  };
+  const SORTERS = {
+    "gia-tang": (a, b) => a.price - b.price,
+    "gia-giam": (a, b) => b.price - a.price,
+    "ten":      (a, b) => a.name.localeCompare(b.name, "vi"),
+  };
 
-  const myDiv1 = document.createElement("div");
-  myDiv1.setAttribute("class", "product-image");
-
-  const productImg = document.createElement("img");
-  productImg.setAttribute("src", product.img);
-  productImg.setAttribute("alt", product.name);
-  productImg.setAttribute("class", "img-fluid");
-
-  myDiv1.appendChild(productImg);
-  myDiv.appendChild(myDiv1);
-
-  const myDiv2 = document.createElement("div");
-  myDiv2.setAttribute("class", "product-info");
-
-  const myP1 = document.createElement("p");
-  myP1.textContent = product.name;
-
-  const myP2 = document.createElement("p");
-  myP2.textContent = product.price.toLocaleString() + " VND";
-
-  const myLink = document.createElement("a");
-  myLink.setAttribute("href", product.productLink + "?id=" + product.id);
-  myLink.setAttribute("class", "btn btn-info");
-  myLink.textContent = "Xem chi tiết";
-
-  myDiv2.appendChild(myP1);
-  myDiv2.appendChild(myP2);
-  myDiv2.appendChild(myLink);
-  myDiv.appendChild(myDiv2);
-  container.appendChild(myDiv);
-}
-
-function loadProducts(products) {
-  for (let i = 0; i < products.length; i++) {
-    addProduct_v2(products[i]);
+  // Lấy lại lựa chọn từ địa chỉ trang, ví dụ san-pham-tuong.html?price=duoi200&sort=gia-tang
+  function docBoLocTuUrl() {
+    const sp = new URLSearchParams(window.location.search);
+    const gan = (sel, val) => { if ([...sel.options].some((o) => o.value === val)) sel.value = val; };
+    gan(fPrice, sp.get("price") || "");
+    gan(fSort, sp.get("sort") || "");
   }
-}
+
+  // Ghi lựa chọn lên địa chỉ trang (tải lại trang vẫn giữ bộ lọc)
+  function ghiBoLocLenUrl() {
+    try {
+      const url = new URL(window.location.href);
+      [["price", fPrice.value], ["sort", fSort.value]].forEach(function (kv) {
+        if (kv[1]) url.searchParams.set(kv[0], kv[1]); else url.searchParams.delete(kv[0]);
+      });
+      window.history.replaceState(null, "", url);
+    } catch (e) { /* mở bằng file:// thì bỏ qua */ }
+  }
+
+  function hienThi() {
+    // Chỉ lấy sản phẩm thuộc danh mục của trang này
+    const trongMuc = productDatabase.filter((p) => p.category === DANH_MUC);
+
+    let visible = trongMuc.slice();
+    if (fPrice.value) visible = visible.filter((p) => PRICE_FILTERS[fPrice.value](p.price));
+    if (fSort.value) visible.sort(SORTERS[fSort.value]);
+    ghiBoLocLenUrl();
+
+    document.getElementById("filter-count").textContent =
+      fPrice.value ? "Hiển thị " + visible.length + " / " + trongMuc.length + " sản phẩm" : "";
+
+    container.innerHTML = "";
+    if (trongMuc.length === 0) {
+      container.innerHTML = "<p class='text-center'>Hiện chưa có sản phẩm nào trong mục này.</p>";
+      return;
+    }
+    if (visible.length === 0) {
+      container.innerHTML = "<p class='text-center'>Không có sản phẩm nào phù hợp với bộ lọc. Hãy thử chọn mức giá khác.</p>";
+      return;
+    }
+
+    visible.forEach(function (product) {
+      const col = document.createElement("div");
+      col.className = "col-6 col-md-4 col-lg-3 mb-4";
+      col.innerHTML = `
+        <div class="card h-100">
+          <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" class="card-img-top" style="height:180px; object-fit:cover;">
+          <div class="card-body">
+            <h6 class="card-title">${escapeHtml(product.name)}</h6>
+            <p class="card-text text-danger fw-bold">${product.price.toLocaleString()} VND</p>
+            <a href="chi-tiet.html?id=${product.id}" class="btn btn-sm btn-outline-secondary w-100 mb-2">Xem chi tiết</a>
+            <button onclick="buyNow(${product.id})" class="btn btn-sm btn-danger w-100">Mua ngay</button>
+          </div>
+        </div>`;
+      container.appendChild(col);
+    });
+  }
+
+  [fPrice, fSort].forEach((el) => el.addEventListener("change", hienThi));
+  document.getElementById("f-reset").addEventListener("click", function () {
+    fPrice.value = "";
+    fSort.value = "";
+    hienThi();
+  });
+
+  // Chờ lib.js ghép xong dữ liệu (kể cả thay đổi của quản trị viên) rồi mới hiển thị
+  productReady.then(function () {
+    docBoLocTuUrl();
+    hienThi();
+  });
+
+  // Nút "Mua ngay" gọi buyNow(id) trong lib.js:
+  //  - đã đăng nhập  -> sang trang mua-hang.html
+  //  - chưa đăng nhập -> báo và chuyển sang trang đăng nhập
+  // Hiện "Xin chào, tên" + Đăng xuất (hoặc "Quản trị") trên menu
+  if (typeof UserLib !== "undefined") UserLib.renderNavUser();
+})();

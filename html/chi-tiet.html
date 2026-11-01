@@ -7,6 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/user.js"></script>
   <script src="../js/lib.js"></script>
 </head>
 <body>
@@ -27,9 +28,8 @@
     🛒
     <span id="cart-count" style="position:absolute; top:-5px; right:-10px; background:red; color:white; border-radius:50%; font-size:11px; font-weight:bold; width:18px; height:18px; display:flex; align-items:center; justify-content:center;">0</span>
   </div>
-  <div id="popup" style="display:none; position:absolute; right:0; margin-top:8px; background:white; border:1px solid #ddd; border-radius:10px; padding:15px; width:200px; box-shadow:2px 2px 10px rgba(0,0,0,0.2);">
+  <div id="popup" style="display:none; position:absolute; right:0; margin-top:8px; background:white; border:1px solid #ddd; border-radius:10px; padding:15px; width:330px; max-width:90vw; max-height:75vh; overflow:auto; box-shadow:2px 2px 10px rgba(0,0,0,0.2); font-size:14px;">
     <div id="popup-noidung"></div>
-    <button onclick="document.getElementById('popup').style.display='none'" style="margin-top:8px; width:100%; padding:5px; border:none; background:#eee; border-radius:6px; cursor:pointer;">Đóng</button>
   </div>
 </div>
 
@@ -53,18 +53,32 @@
 
 <script>
   const id = Number(new URLSearchParams(window.location.search).get("id"));
-  const sp = productDatabase.find(p => p.id === id);
+  let sp = null;
 
-  
-  document.getElementById("p-name").innerText = sp.name;
-  document.getElementById("p-price").innerText = sp.price.toLocaleString() + " VND";
-  document.getElementById("p-image").src = sp.img;
-  document.getElementById("p-desc").innerText = sp.desc;
+  // Chờ lấy danh sách sản phẩm từ MySQL rồi mới hiển thị
+  productReady.then(function () {
+    sp = productDatabase.find(p => p.id === id);
 
+    if (!sp) {
+      document.getElementById("p-name").innerText = "Không tìm thấy sản phẩm";
+      document.getElementById("p-desc").innerHTML = "Sản phẩm này không tồn tại hoặc đã bị xóa. <a href='san-pham.html'>Quay lại trang sản phẩm</a>";
+      document.getElementById("p-price").innerText = "";
+      document.getElementById("p-image").style.display = "none";
+      document.querySelectorAll(".d-flex.gap-2.mt-3 button").forEach(b => b.disabled = true);
+    } else {
+      document.getElementById("p-name").innerText = sp.name;
+      document.getElementById("p-price").innerText = sp.price.toLocaleString() + " VND";
+      document.getElementById("p-image").src = sp.img;
+      document.getElementById("p-desc").innerText = sp.desc;
+    }
+    capNhatBadge();
+  });
 
   function layGio() {
     const chuoi = localStorage.getItem("shopCart") || "";
-    return chuoi === "" ? [] : chuoi.split(",").map(Number);
+    if (chuoi === "") return [];
+    // bỏ id lỗi / sản phẩm không còn tồn tại
+    return chuoi.split(",").map(Number).filter(i => productDatabase.some(p => p.id === i));
   }
   function luuGio(gio) {
     localStorage.setItem("shopCart", gio.join(","));
@@ -73,33 +87,114 @@
     document.getElementById("cart-count").innerText = layGio().length;
   }
 
-  // Mở popup giỏ hàng
-  function moGioHang() {
-    const popup = document.getElementById("popup");
-    if (popup.style.display === "block") { popup.style.display = "none"; return; }
-    const soLuong = layGio().length;
-    const nd = soLuong === 0 ? "Giỏ hàng trống!" : "Bạn có <b style='color:red'>" + soLuong + "</b> sản phẩm.";
-    document.getElementById("popup-noidung").innerHTML = nd;
-    popup.style.display = "block";
+  // ===== GIỎ HÀNG =====
+  const tien = n => n.toLocaleString("vi-VN") + " VND";
+  const nutNho = "border:none;background:#eee;border-radius:4px;width:24px;height:24px;cursor:pointer;";
+
+  // Gom các id trùng thành {id: số lượng}
+  function gomGio() {
+    const dem = {};
+    layGio().forEach(i => { dem[i] = (dem[i] || 0) + 1; });
+    return dem;
   }
 
+  // Vẽ nội dung giỏ hàng trong popup
+  function hienGioHang(thongBao) {
+    const dem = gomGio();
+    const ids = Object.keys(dem).map(Number);
+    let html = "";
 
+    if (thongBao) {
+      html += "<div style='background:#d1e7dd;color:#0f5132;padding:6px 10px;border-radius:6px;margin-bottom:8px;'>✅ " + thongBao + "</div>";
+    }
+
+    if (ids.length === 0) {
+      html += "<div style='text-align:center;padding:10px 0;'>Giỏ hàng trống!</div>";
+      html += "<button onclick=\"dongGioHang()\" style='width:100%;padding:6px;border:none;background:#eee;border-radius:6px;cursor:pointer;'>Đóng</button>";
+    } else {
+      let tong = 0;
+      ids.forEach(i => {
+        const p = productDatabase.find(x => x.id === i);
+        const q = dem[i];
+        tong += p.price * q;
+        html += "<div style='display:flex;gap:8px;align-items:center;border-bottom:1px solid #eee;padding:8px 0;'>" +
+          "<img src='" + escapeHtml(p.img) + "' style='width:50px;height:50px;object-fit:cover;border-radius:6px;'>" +
+          "<div style='flex:1;min-width:0;'>" +
+            "<div style='font-weight:bold;font-size:13px;'>" + escapeHtml(p.name) + "</div>" +
+            "<div style='color:#c0392b;font-size:13px;'>" + tien(p.price) + "</div>" +
+            "<div style='margin-top:4px;display:flex;align-items:center;gap:6px;'>" +
+              "<button style='" + nutNho + "' onclick='doiSoLuong(" + i + ",-1)'>−</button>" +
+              "<b>" + q + "</b>" +
+              "<button style='" + nutNho + "' onclick='doiSoLuong(" + i + ",1)'>+</button>" +
+              "<button onclick='xoaKhoiGio(" + i + ")' style='margin-left:auto;border:none;background:none;color:#dc3545;cursor:pointer;font-size:13px;'>🗑 Xóa</button>" +
+            "</div>" +
+          "</div></div>";
+      });
+      html += "<div style='text-align:right;margin:10px 0;font-weight:bold;'>Tổng: <span style='color:#c0392b;'>" + tien(tong) + "</span></div>";
+      html += "<div style='display:flex;gap:8px;'>" +
+        "<button onclick='dongGioHang()' style='flex:1;padding:7px;border:none;background:#eee;border-radius:6px;cursor:pointer;'>Đóng</button>" +
+        "<button onclick='thanhToan()' style='flex:1;padding:7px;border:none;background:#198754;color:#fff;border-radius:6px;cursor:pointer;'>Thanh toán</button>" +
+        "</div>";
+    }
+    document.getElementById("popup-noidung").innerHTML = html;
+    document.getElementById("popup").style.display = "block";
+  }
+
+  function dongGioHang() {
+    document.getElementById("popup").style.display = "none";
+  }
+
+  // Bấm vào biểu tượng 🛒: mở / đóng giỏ hàng
+  function moGioHang() {
+    if (document.getElementById("popup").style.display === "block") {
+      dongGioHang();
+    } else {
+      hienGioHang();
+    }
+  }
+
+  // Tăng / giảm số lượng một sản phẩm trong giỏ
+  function doiSoLuong(maSP, delta) {
+    const gio = layGio();
+    if (delta > 0) {
+      gio.push(maSP);
+    } else {
+      const vt = gio.indexOf(maSP);
+      if (vt !== -1) gio.splice(vt, 1);
+    }
+    luuGio(gio);
+    capNhatBadge();
+    hienGioHang();
+  }
+
+  // Xóa hẳn một sản phẩm khỏi giỏ
+  function xoaKhoiGio(maSP) {
+    luuGio(layGio().filter(i => i !== maSP));
+    capNhatBadge();
+    hienGioHang("Đã xóa sản phẩm khỏi giỏ hàng.");
+  }
+
+  // Thanh toán cả giỏ (cần đăng nhập)
+  function thanhToan() {
+    if (layGio().length === 0) return hienGioHang();
+    checkoutCart();
+  }
+
+  // Thêm vào giỏ xong thì mở giỏ hàng để thanh toán hoặc xóa
   function themGio() {
     const gio = layGio();
     gio.push(id);
     luuGio(gio);
     capNhatBadge();
-    alert("Đã thêm vào giỏ hàng!");
+    hienGioHang("Đã thêm vào giỏ hàng!");
   }
 
+  // Mua ngay: đã đăng nhập -> sang trang mua hàng, chưa đăng nhập -> sang trang đăng nhập
   function muaNgay() {
-    const gio = layGio();
-    gio.push(id);
-    luuGio(gio);
-    capNhatBadge();
-}
+    buyNow(id);
+  }
 
-  capNhatBadge();
+  if (typeof UserLib !== "undefined") UserLib.renderNavUser();
 </script>
 
 <footer>
@@ -115,7 +210,7 @@
       <a href="lien-he.html">Liên Hệ</a>
     </div>
   </div>
-  <div class="footer-bottom">Trang web được thiết kế bởi Vũ Thị Nhựt Đang @2026 · HTML tĩnh</div>
+  <div class="footer-bottom">Trang web được thiết kế bởi Vũ Thị Nhựt Đang @2026</div>
 </footer>
 
 </body>

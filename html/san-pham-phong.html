@@ -7,67 +7,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="../css/style-sp.css">
-  <script src="../js/phong.js"></script>  
+  <!-- user.js phải đứng trước lib.js. KHÔNG đặt phong.js ở đây (xem cuối trang) -->
+  <script src="../js/user.js"></script>
+  <script src="../js/lib.js"></script>
 </head>
-<body>
+<body data-category="phong">
 <nav>
   <a class="nav-brand" href="../index.html">🌸 Tiệm của Bơ</a>
   <div class="nav-links">
     <a href="../index.html">Trang Chủ</a>
     <a href="gioi-thieu.html">Giới Thiệu</a>
     <a href="san-pham.html">Sản Phẩm</a>
-    
     <a href="lien-he.html">Liên Hệ</a>
-
-
-<a href="kho.html" class="btn btn-outline-danger"> Kho ẩn</a>
   </div>
+  <div class="nav-user"></div>
 </nav>
 
 <h2>Sản Phẩm - Decor Phòng</h2>
 
-<div class="container-fluid mt-5">
+<div class="container-fluid mt-4">
+  <!-- Bộ lọc -->
+  <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mb-2">
+    <select id="f-price" class="form-select" style="max-width:210px;" aria-label="Khoảng giá">
+      <option value="">Mọi mức giá</option>
+      <option value="duoi200">Dưới 200.000đ</option>
+      <option value="200-1000">200.000đ – 1.000.000đ</option>
+      <option value="1000-3000">1.000.000đ – 3.000.000đ</option>
+      <option value="tren3000">Trên 3.000.000đ</option>
+    </select>
+    <select id="f-sort" class="form-select" style="max-width:190px;" aria-label="Sắp xếp">
+      <option value="">Sắp xếp mặc định</option>
+      <option value="gia-tang">Giá thấp → cao</option>
+      <option value="gia-giam">Giá cao → thấp</option>
+      <option value="ten">Tên A → Z</option>
+    </select>
+    <button type="button" id="f-reset" class="btn btn-outline-secondary">Xóa bộ lọc</button>
+  </div>
+  <div id="filter-count" class="text-center text-muted mb-3"></div>
+
+  <!-- Chỉ được có MỘT khung product-list trong trang -->
   <div id="product-list" class="product-grid"></div>
-</div>
 
-<script>
-  const chuoi = localStorage.getItem("shopDeletedIds") || "";
-  const deletedIds = chuoi === "" ? [] : chuoi.split(",").map(Number);
-
-  const container = document.getElementById("product-list");
-  container.className = "row";
-
-  const visible = productDatabase.filter(p => !deletedIds.includes(p.id));
-
-  visible.forEach(product => {
-    const col = document.createElement("div");
-    col.className = "col-6 col-md-4 col-lg-3 mb-4";
-    col.innerHTML = `
-      <div class="card h-100">
-        <img src="${product.img}" class="card-img-top" style="height:180px; object-fit:cover;">
-        <div class="card-body">
-          <h6 class="card-title">${product.name}</h6>
-          <p class="card-text text-danger fw-bold">${product.price.toLocaleString()} VND</p>
-          <a href="chi-tiet.html?id=${product.id}" class="btn btn-sm btn-outline-secondary w-100 mb-2">Xem chi tiết</a>
-          <button onclick="xoaSanPham(${product.id}, this)" class="btn btn-sm btn-outline-danger w-100">🗑 Xóa</button>
-        </div>
-      </div>`;
-    container.appendChild(col);
-  });
-
-  function xoaSanPham(id, btn) {
-    if (!confirm("Xóa sản phẩm này?")) return;
-    deletedIds.push(id);
-    localStorage.setItem("shopDeletedIds", deletedIds.join(","));
-    btn.closest(".col-6").remove();
-  }
-</script>
-
-
-<div class="container text-center my-4">
-  <a href="them.html" class="btn btn-success" style="background-color: #E8D5C4 ;
-  color: #5C4A3A ; 
-  border: none ;"> Thêm sản phẩm</a>
+  <div class="text-center my-3">
+    <a href="san-pham.html" class="btn btn-sm btn-outline-secondary">← Xem tất cả sản phẩm</a>
+  </div>
 </div>
 
 <footer>
@@ -78,12 +61,38 @@
     </div>
     <div class="footer-links">
       <a href="../index.html">Trang Chủ</a>
-	<a href="gioi-thieu.html">Giới Thiệu</a>
+      <a href="gioi-thieu.html">Giới Thiệu</a>
       <a href="san-pham.html">Sản Phẩm</a>
       <a href="lien-he.html">Liên Hệ</a>
     </div>
   </div>
-  <div class="footer-bottom">Trang web được thiết kế bởi VŨ THỊ NHỰT ĐANG @2026 · HTML tĩnh</div>
+  <div class="footer-bottom">Trang web được thiết kế bởi VŨ THỊ NHỰT ĐANG @2026</div>
 </footer>
+
+<!-- Đặt CUỐI trang, sau user.js và lib.js, để các phần tử bên trên đã có sẵn -->
+<script src="../js/phong.js"></script>
+<script>
+  // Đưa "Xin chào / Đăng xuất" sang khung bên phải (.nav-user)
+  (function () {
+    var links = document.querySelector(".nav-links");
+    var box = document.querySelector(".nav-user");
+    var soMucGoc = 4; // 4 mục menu gốc: Trang Chủ, Giới Thiệu, Sản Phẩm, Liên Hệ
+    function chuyen() {
+      while (links.children.length > soMucGoc) {
+        box.appendChild(links.children[soMucGoc]);
+      }
+      // nếu bị thêm 2 lần thì xóa mục trùng
+      var seen = {};
+      Array.from(box.children).forEach(function (el) {
+        if (seen[el.textContent]) el.remove(); else seen[el.textContent] = 1;
+      });
+    }
+    var ob = new MutationObserver(chuyen);
+    ob.observe(links, { childList: true });
+    ob.observe(box, { childList: true });
+    if (typeof UserLib !== "undefined") UserLib.renderNavUser();
+    chuyen();
+  })();
+</script>
 </body>
 </html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QUẢN TRỊ SẢN PHẨM</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #FAF6F1; color: #5C4A3A; font-family: Arial, sans-serif; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+    main { flex: 1; }
+
+    nav { background: #E8D5C4; padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 3px solid #D4B89A; }
+    .nav-brand { font-size: 1.4rem; font-weight: bold; color: #5C4A3A; text-decoration: none; }
+    .nav-right { display: flex; align-items: center; gap: 12px; font-size: .95rem; }
+    .nav-right a { color: #5C4A3A; font-weight: bold; text-decoration: none; }
+    .nav-right a:hover { text-decoration: underline; }
+
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+    h2 { text-align: center; margin: 18px 0 4px; }
+    .sub { text-align: center; color: #9C8070; margin-bottom: 18px; font-size: .95rem; }
+
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .toolbar input[type="search"] { flex: 1; min-width: 200px; padding: 9px 14px; border: 1px solid #D4B89A; border-radius: 999px; font-size: .95rem; background: #fff; color: #5C4A3A; }
+
+    .btn { border: none; border-radius: 8px; padding: 9px 18px; font-size: .92rem; cursor: pointer; font-weight: bold; }
+    .btn-main { background: #198754; color: #fff; }
+    .btn-edit { background: #E8D5C4; color: #5C4A3A; padding: 6px 12px; }
+    .btn-del { background: #f8d7da; color: #842029; padding: 6px 12px; }
+    .btn-gray { background: #e9ecef; color: #333; }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+
+    .table-wrap { background: #fff; border: 1px solid #D4B89A; border-radius: 12px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 640px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #F1E7DC; vertical-align: middle; font-size: .92rem; }
+    th { background: #F5EDE4; }
+    td img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; }
+    .desc { max-width: 280px; color: #777; }
+    .price { color: #c0392b; font-weight: bold; white-space: nowrap; }
+    .actions { white-space: nowrap; display: flex; gap: 6px; }
+    .empty { text-align: center; padding: 26px; color: #9C8070; }
+
+    /* Hộp thêm / sửa */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; align-items: center; justify-content: center; padding: 14px; }
+    .modal.open { display: flex; }
+    .modal-box { background: #fff; width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto; border-radius: 12px; padding: 22px; border-top: 6px solid #D4B89A; }
+    .modal-box h3 { margin-bottom: 14px; }
+    .row { margin-bottom: 12px; }
+    .row label { display: block; font-weight: bold; margin-bottom: 4px; font-size: .92rem; }
+    .row input[type="text"], .row input[type="number"], .row textarea { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+    .row small { color: #9C8070; }
+    .preview { margin-top: 8px; width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; display: none; }
+    .form-error { display: none; background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: .92rem; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+    footer { background: #D4B89A; padding: 10px 28px; font-size: .78rem; text-align: center; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="../index.html">🌸 Tiệm của Bơ — Quản trị</a>
+  <div class="nav-right">
+    <a href="san-pham.html">Xem trang sản phẩm</a>
+    <span id="adminName"></span>
+    <a href="#" id="btnLogout">Đăng xuất</a>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap" id="adminPage" style="display:none;">
+    <h2>Quản lý sản phẩm</h2>
+    <p class="sub">Thêm, sửa, xóa sản phẩm — thay đổi được lưu trong trình duyệt này và hiện ngay ở trang sản phẩm.</p>
+
+    <div class="toolbar">
+      <input type="search" id="fSearch" placeholder="🔍 Tìm trong danh sách...">
+      <button class="btn btn-gray" id="btnReset" title="Bỏ mọi thay đổi, quay về danh sách ban đầu"> Khôi phục sản phẩm gốc</button>
+      <button class="btn btn-main" id="btnAdd"> Thêm sản phẩm</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Ảnh</th><th>Tên sản phẩm</th><th>Danh mục</th><th>Giá</th><th>Mô tả</th><th>Thao tác</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Hộp thêm / sửa sản phẩm -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3 id="modalTitle">Thêm sản phẩm</h3>
+    <div class="form-error" id="formError"></div>
+
+    <div class="row">
+      <label for="fName">Tên sản phẩm *</label>
+      <input type="text" id="fName" maxlength="255">
+    </div>
+    <div class="row">
+      <label for="fCat">Danh mục</label>
+      <select id="fCat" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font:inherit;"></select>
+    </div>
+    <div class="row">
+      <label for="fPrice">Giá (VND) *</label>
+      <input type="number" id="fPrice" min="0" step="1000">
+    </div>
+    <div class="row">
+      <label for="fDesc">Mô tả</label>
+      <textarea id="fDesc" rows="4" maxlength="3000"></textarea>
+    </div>
+    <div class="row">
+      <label for="fImage">Ảnh sản phẩm</label>
+      <input type="file" id="fImage" accept="image/png,image/jpeg,image/webp,image/gif">
+      <small>Ảnh sẽ được tự thu nhỏ để lưu gọn trong trình duyệt.</small>
+      <img class="preview" id="preview" alt="Xem trước">
+    </div>
+    <div class="row">
+      <label for="fImgPath">Hoặc nhập đường dẫn ảnh có sẵn</label>
+      <input type="text" id="fImgPath" placeholder="../assets/ten-anh.jpg">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-gray" id="btnCancel" type="button">Hủy</button>
+      <button class="btn btn-main" id="btnSave" type="button">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<footer>Trang quản trị · Tiệm của Bơ @2026</footer>
+
+<script src="../js/user.js"></script>
+<script src="../js/lib.js"></script>
+<script>
+  (function () {
+    if (typeof UserLib === "undefined") {
+      alert("Không tải được file user.js! Hãy kiểm tra file nằm ở thư mục js/.");
+      return;
+    }
+
+    const $ = (id) => document.getElementById(id);
+    const money = (n) => Number(n).toLocaleString("vi-VN") + " VND";
+    let products = [];
+    let editingId = null; // null = đang thêm mới
+
+    const toLogin = () => (window.location.href = "sign-in.html");
+
+    // Đổ danh sách danh mục vào ô chọn
+    Object.keys(CATEGORIES).forEach(function (key) {
+      const o = document.createElement("option");
+      o.value = key;
+      o.textContent = CATEGORIES[key];
+      $("fCat").appendChild(o);
+    });
+
+    // ----- Danh sách -----
+    function taiDanhSach() {
+      applyLocalProducts();            // đọc lại dữ liệu mới nhất
+      products = productDatabase.slice();
+      veBang();
+    }
+
+    function veBang() {
+      const kw = $("fSearch").value.trim();
+      const list = kw === "" ? products : products.filter((p) => matchKeyword(p.name, kw));
+      const tbody = $("tbody");
+      tbody.innerHTML = "";
+
+      if (list.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='7' class='empty'>Không có sản phẩm nào.</td></tr>";
+        return;
+      }
+
+      list.forEach(function (p) {
+        const tr = document.createElement("tr");
+
+        const tdId = document.createElement("td"); tdId.textContent = p.id;
+
+        const tdImg = document.createElement("td");
+        const img = document.createElement("img"); img.src = p.img; img.alt = p.name;
+        tdImg.appendChild(img);
+
+        const tdName = document.createElement("td"); tdName.textContent = p.name;
+
+        const tdCat = document.createElement("td"); tdCat.textContent = CATEGORIES[p.category] || "Khác";
+
+        const tdPrice = document.createElement("td"); tdPrice.className = "price"; tdPrice.textContent = money(p.price);
+
+        const tdDesc = document.createElement("td"); tdDesc.className = "desc";
+        const desc = p.desc || "";
+        tdDesc.textContent = desc.length > 80 ? desc.slice(0, 80) + "…" : desc;
+
+        const tdAct = document.createElement("td");
+        const box = document.createElement("div"); box.className = "actions";
+        const bEdit = document.createElement("button");
+        bEdit.className = "btn btn-edit"; bEdit.textContent = "Sửa";
+        bEdit.addEventListener("click", () => moHop(p));
+        const bDel = document.createElement("button");
+        bDel.className = "btn btn-del"; bDel.textContent = " Xóa";
+        bDel.addEventListener("click", () => xoa(p));
+        box.append(bEdit, bDel);
+        tdAct.appendChild(box);
+
+        tr.append(tdId, tdImg, tdName, tdCat, tdPrice, tdDesc, tdAct);
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ----- Hộp thêm / sửa -----
+    function showFormError(msg) {
+      const e = $("formError");
+      e.textContent = msg;
+      e.style.display = msg ? "block" : "none";
+    }
+
+    function moHop(p) {
+      editingId = p ? p.id : null;
+      $("modalTitle").textContent = p ? "Sửa sản phẩm #" + p.id : "Thêm sản phẩm";
+      $("fName").value = p ? p.name : "";
+      $("fCat").value = p && CATEGORIES[p.category] ? p.category : "khac";
+      $("fPrice").value = p ? p.price : "";
+      $("fDesc").value = p ? p.desc : "";
+      $("fImage").value = "";
+      $("fImgPath").value = "";
+      showFormError("");
+      const pv = $("preview");
+      if (p) { pv.src = p.img; pv.style.display = "block"; } else { pv.style.display = "none"; }
+      $("modal").classList.add("open");
+      $("fName").focus();
+    }
+
+    function dongHop() { $("modal").classList.remove("open"); }
+
+    $("fImage").addEventListener("change", function () {
+      const f = this.files[0];
+      const pv = $("preview");
+      if (f) { pv.src = URL.createObjectURL(f); pv.style.display = "block"; }
+    });
+
+    // Đọc ảnh, thu nhỏ còn tối đa 640px rồi đổi thành chuỗi để lưu trong trình duyệt
+    function docAnh(file) {
+      return new Promise(function (resolve, reject) {
+        if (!/^image\//.test(file.type)) return reject(new Error("File đã chọn không phải ảnh."));
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Không đọc được ảnh."));
+        reader.onload = function () {
+          const img = new Image();
+          img.onerror = () => reject(new Error("File ảnh không hợp lệ."));
+          img.onload = function () {
+            const scale = Math.min(1, 640 / Math.max(img.width, img.height));
+            const w = Math.round(img.width * scale);
+            const h = Math.round(img.height * scale);
+            const c = document.createElement("canvas");
+            c.width = w; c.height = h;
+            const ctx = c.getContext("2d");
+            ctx.fillStyle = "#fff";            // nền trắng cho ảnh PNG trong suốt
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(c.toDataURL("image/jpeg", 0.82));
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    $("btnSave").addEventListener("click", async function () {
+      const name = $("fName").value.trim();
+      const price = $("fPrice").value.trim();
+      const file = $("fImage").files[0];
+      const path = $("fImgPath").value.trim();
+
+      if (name.length < 2) return showFormError("Vui lòng nhập tên sản phẩm (ít nhất 2 ký tự).");
+      if (price === "" || Number(price) < 0 || !Number.isInteger(Number(price))) return showFormError("Giá phải là số nguyên không âm.");
+      if (editingId === null && !file && !path) return showFormError("Vui lòng chọn ảnh hoặc nhập đường dẫn ảnh.");
+      if (path && (!/^(\.\.\/)?assets\/[\w\-./]+$/.test(path) || path.includes("..", 3))) {
+        return showFormError("Đường dẫn ảnh phải có dạng ../assets/ten-anh.jpg");
+      }
+      showFormError("");
+
+      const btn = this;
+      btn.disabled = true;
+      try {
+        let img;
+        if (file) img = await docAnh(file);
+        else if (path) img = path;
+        else img = products.find((p) => p.id === editingId).img; // giữ ảnh cũ
+
+        const isEdit = editingId !== null;
+        saveLocalProduct({ id: editingId, name: name, price: Number(price), img: img, desc: $("fDesc").value.trim(), category: $("fCat").value });
+        dongHop();
+        taiDanhSach();
+        UserLib.popup({ type: "success", title: isEdit ? "Đã cập nhật sản phẩm!" : "Đã thêm sản phẩm!", text: "Thay đổi đã được lưu.", buttonText: "OK", autoCloseMs: 1500 });
+      } catch (e) {
+        showFormError(e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    $("btnCancel").addEventListener("click", dongHop);
+    $("modal").addEventListener("click", function (e) { if (e.target === this) dongHop(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") dongHop(); });
+
+    // ----- Xóa -----
+    function xoa(p) {
+      if (!confirm("Xóa sản phẩm \"" + p.name + "\"?")) return;
+      deleteLocalProduct(p.id);
+      taiDanhSach();
+      UserLib.popup({ type: "success", title: "Đã xóa sản phẩm", text: "\"" + p.name + "\" đã bị xóa khỏi cửa hàng.", buttonText: "OK", autoCloseMs: 1500 });
+    }
+
+    $("btnReset").addEventListener("click", function () {
+      if (!confirm("Bỏ mọi thay đổi và quay về danh sách sản phẩm gốc?\n(Sản phẩm bạn đã thêm sẽ bị xóa, sản phẩm đã xóa sẽ hiện lại.)")) return;
+      resetLocalProducts();
+      taiDanhSach();
+    });
+
+    $("btnAdd").addEventListener("click", () => moHop(null));
+    $("fSearch").addEventListener("input", veBang);
+
+    $("btnLogout").addEventListener("click", async function (e) {
+      e.preventDefault();
+      await UserLib.adminLogout();
+      toLogin();
+    });
+
+    // ----- Khởi động: chỉ quản trị viên mới vào được -----
+    (async function () {
+      const name = await UserLib.adminMe();
+      if (!name) return toLogin();
+      $("adminName").textContent = "👤 " + name;
+      $("adminPage").style.display = "block";
+      taiDanhSach();
+    })();
+  })();
+</script>
+</body>
+</html>

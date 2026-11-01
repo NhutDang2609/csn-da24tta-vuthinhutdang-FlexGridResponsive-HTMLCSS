@@ -1,11 +1,23 @@
+/* =====================================================================
+   Trang ĐĂNG KÝ — Tiệm của Bơ
+   ===================================================================== */
+
+/* ===== 1. Khung trang (footer luôn nằm dưới đáy) ===== */
+* { box-sizing: border-box; }
+
 body {
+  margin: 0;
   background-color: #FAF6F1;
   color: #5C4A3A;
   font-family: Arial, sans-serif;
   font-size: 16px;
   line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
+/* ===== 2. Thanh điều hướng ===== */
 nav {
   background-color: #E8D5C4;
   padding: 14px 28px;
@@ -32,8 +44,6 @@ nav {
   transform: translateX(-50%);
 }
 
-
-
 nav a {
   color: #5C4A3A;
   text-decoration: none;
@@ -44,13 +54,12 @@ nav a {
   transition: background 0.2s;
 }
 
-nav a:hover, nav a.active {
-  background-color: #F5EDE4;
-}
+nav a:hover, nav a.active { background-color: #F5EDE4; }
 
+/* ===== 3. Tiêu đề trang ===== */
 .page-title {
   text-align: center;
-  padding: 36px 20px 10px;
+  padding: 32px 20px 10px;
   font-size: 22px;
   font-weight: bold;
   color: #6B4F4F;
@@ -58,83 +67,132 @@ nav a:hover, nav a.active {
   margin: 0 28px;
 }
 
+/* ===== 4. Khung chứa form ===== */
 .container {
-  width: 60%;
-  margin: 5% auto;
-  display: flex;
-  justify-content: center;
-  
+  flex: 1;                       /* đẩy footer xuống đáy khi trang ngắn */
+  width: 100%;
+  max-width: 600px;
+  margin: 28px auto 48px;
+  padding: 0 16px;
+  display: block;
 }
 
+/* ===== 5. Form đăng ký (lưới 2 cột) ===== */
 #frmRegister {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 18px;
   width: 100%;
   background: #fff;
   border: 1px solid #F7C5CC;
-  border-radius: 12px;
-  padding: 28px 32px;
-  
+  border-radius: 16px;
+  padding: 30px 34px 26px;
+  box-shadow: 0 8px 24px rgba(212, 184, 154, 0.25);
 }
+
+/* Mặc định mỗi mục chiếm cả hàng; mục có class "half" chia đôi hàng */
+#frmRegister > * { grid-column: 1 / -1; }
+#frmRegister > .half { grid-column: auto; }
 
 .form-group {
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  
-  
 }
 
-.form-group label {
+.form-group > label {
   font-size: 13px;
   font-weight: bold;
-  color: #a07070;
- 
+  color: #8B5E5E;
 }
 
-.form-group input {
+/* Ô nhập chữ (không áp dụng cho nút tròn giới tính) */
+.form-group input:not([type="radio"]) {
   width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #F7C5CC;
-  border-radius: 8px;
+  padding: 11px 14px;
+  border: 1.5px solid #F7C5CC;
+  border-radius: 10px;
   font-size: 14px;
+  font-family: Arial, sans-serif;
   color: #6B4F4F;
   background: #FFF8F5;
   outline: none;
-  transition: border 0.2s;
-  font-family: Arial, sans-serif;
-  
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-.form-group input:focus {
-  border-color: #e8a8b0;
+.form-group input:not([type="radio"])::placeholder { color: #BFA9A9; }
+
+.form-group input:not([type="radio"]):focus {
+  border-color: #E39AA6;
   background: #fff;
-  
+  box-shadow: 0 0 0 3px rgba(247, 197, 204, 0.5);
 }
 
+/* Ô số điện thoại: bỏ mũi tên tăng giảm của type="number" */
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Giới tính: hai nút dạng viên thuốc */
 .rdgioitinh {
-  margin-left: 35%;
   display: flex;
-  gap: 20px;
-  align-items: center;
+  gap: 10px;
 }
+
+.rdgioitinh label {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 41px;              /* cao bằng các ô nhập bên cạnh */
+  padding: 0 14px;
+  border: 1.5px solid #F7C5CC;
+  border-radius: 999px;
+  background: #FFF8F5;
+  color: #6B4F4F;
+  font-size: 14px;
+  font-weight: normal;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.rdgioitinh label:hover { background: #fff; }
+.rdgioitinh label:has(input:checked) { background: #F7C5CC; border-color: #E39AA6; font-weight: bold; }
+.rdgioitinh input[type="radio"] { accent-color: #C9707F; margin: 0; width: auto; }
+
+/* ===== 6. Nút đăng ký ===== */
+.form-actions { margin-top: 6px; }
 
 .button {
-  width: 30%;
-  padding: 15px;
+  display: block;
+  width: 100%;
+  padding: 14px;
   background-color: #E8D5C4;
-  border: none;
-  border-radius: 8px;
-  color: #6B4F4F;
+  border: 2px solid #D4B89A;
+  border-radius: 10px;
+  color: #5C4A3A;
   font-weight: bold;
-  font-size: 15px;
+  font-size: 16px;
   cursor: pointer;
-  transition: background 0.2s;
-  margin-top: 4px;
+  transition: background 0.2s, transform 0.1s;
 }
 
-.button:hover { background-color: #F5EDE4; }
+.button:hover { background-color: #D4B89A; }
+.button:active { transform: translateY(1px); }
 
-/* ===== 7. Footer (Flexbox) ===== */
+.form-note {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: #9C8070;
+}
+
+.form-note a { color: #5C4A3A; font-weight: bold; text-decoration: none; }
+.form-note a:hover { text-decoration: underline; }
+
+/* ===== 7. Footer ===== */
 footer {
   background-color: #E8D5C4;
   border-top: 3px solid #D4B89A;
@@ -149,30 +207,11 @@ footer {
   padding: 20px 28px 14px;
 }
 
-.footer-brand {
-  font-weight: bold;
-  font-size: 1.05rem;
-  margin-bottom: 4px;
-}
+.footer-brand { font-weight: bold; font-size: 1.05rem; margin-bottom: 4px; }
+.footer-sub { font-size: 0.75rem; color: #9C8070; }
 
-.footer-sub {
-  font-size: 0.75rem;
-  color: #9C8070;
-}
-
-.footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: center;
-}
-
-.footer-links a {
-  color: #5C4A3A;
-  text-decoration: none;
-  font-size: 0.8rem;
-}
-
+.footer-links { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.footer-links a { color: #5C4A3A; text-decoration: none; font-size: 0.8rem; }
 .footer-links a:hover { text-decoration: underline; }
 
 .footer-bottom {
@@ -183,42 +222,21 @@ footer {
 }
 
 /* ===== 8. Responsive ===== */
-/* Máy tính bảng: 769px - 991px -> 3 cột */
-@media (min-width: 769px) {
-  .product-grid { grid-template-columns: repeat(3, 1fr); }
-}
- 
-/* Máy tính: từ 992px -> 4 cột */
-@media (min-width: 992px) {
-  .product-grid { grid-template-columns: repeat(4, 1fr); }
-}
-/* Máy tính bảng */
 @media (max-width: 1024px) {
   nav { padding: 12px 20px; }
   .nav-brand { font-size: 1.25rem; }
   .nav-links a { font-size: 0.875rem; padding: 6px 10px; }
-  .login-bar { font-size: 0.8rem; }
-
-  .deco { gap: 16px; padding: 16px 20px 32px; }
-  .deco figure img { height: 200px; }
 }
 
-/* Điện thoại */
-@media (max-width: 768px) {
+/* Menu xếp dọc khi màn hình hẹp (tránh chữ đè lên logo) */
+@media (max-width: 860px) {
   nav {
-    display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
     padding: 10px 14px;
   }
-
-
-
-  .nav-brand {
-    font-size: 16px;
-  }
-
+  .nav-brand { font-size: 16px; }
   .nav-links {
     position: static;
     transform: none;
@@ -227,38 +245,14 @@ footer {
     width: 100%;
     gap: 4px;
   }
+  .nav-links a { font-size: 12px; padding: 4px 8px; }
+  .page-title { margin: 0 14px; font-size: 19px; padding-top: 24px; }
+  .footer-links { gap: 10px; }
+}
 
-  .nav-links a {
-    font-size: 12px;
-    padding: 4px 8px;
-  }
-
-  .container {
-    width: 95%;
-    margin: 20px auto;
-  }
-
-  #frmRegister {
-    width: 100%;
-    padding: 20px 16px;
-    
-  }
-
-  .form-group input {
-    width: 100%;
-    
-  }
-
-  .rdgioitinh {
-    margin-left: 0;
-  }
-
-  .button {
-    width: 100%;
-  }
-
-  .footer-links {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
+/* Điện thoại: form 1 cột */
+@media (max-width: 600px) {
+  .container { margin: 18px auto 32px; padding: 0 12px; }
+  #frmRegister { padding: 22px 18px 20px; grid-template-columns: 1fr; }
+  #frmRegister > .half { grid-column: 1 / -1; }
 }

@@ -28,7 +28,7 @@
         <div id="alertMsg" style="display:none;"></div>
 
         <div class="form-group">
-          <label for="txtUsername">Tên đăng nhập (Email):</label>
+          <label for="txtUsername">Tên đăng nhập (Email / tài khoản quản trị):</label>
           <input class="form-control" type="text" id="txtUsername"
                  name="txtUsername" placeholder="example@email.com" required>
         </div>
@@ -56,11 +56,17 @@
       <a href="lien-he.html">Liên Hệ</a>
     </div>
   </div>
-  <div class="footer-bottom">Trang web được thiết kế bởi Vũ Thị Nhựt Đang @2026 · HTML tĩnh</div>
+  <div class="footer-bottom">Trang web được thiết kế bởi Vũ Thị Nhựt Đang @2026</div>
 </footer>
     
+    <script src="../js/admin.js"></script>
+    <script src="../js/user.js"></script>
     <script>
-      UserLib.initLoginForm();
+      if (typeof UserLib === "undefined") {
+        alert("Không tải được file user.js!\nHãy kiểm tra file có nằm ở thư mục js/ (cùng cấp với thư mục css/) và tên đúng là user.js.");
+      } else {
+        UserLib.initLoginForm();
+      }
     </script>
   </body>
 </html>

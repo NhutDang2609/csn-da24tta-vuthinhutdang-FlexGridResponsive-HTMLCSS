@@ -90,6 +90,111 @@ nav {
 
 .login-bar a:hover { text-decoration: underline; }
 
+/* ===== 3b. Thanh tìm kiếm ===== */
+.search-box {
+  background-color: #F5EDE4;
+  padding: 14px 20px;
+  border-bottom: 1px solid #E8D5C4;
+}
+
+.search-form {
+  position: relative;
+  max-width: 580px;
+  margin: 0 auto;
+  display: flex;
+  gap: 8px;
+}
+
+.search-form input[type="search"] {
+  flex: 1;
+  padding: 10px 18px;
+  border: 1px solid #D4B89A;
+  border-radius: 999px;
+  background-color: #fff;
+  color: #5C4A3A;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.search-form input[type="search"]:focus {
+  border-color: #B89572;
+  box-shadow: 0 0 0 3px rgba(212, 184, 154, 0.35);
+}
+
+.search-form button {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 999px;
+  background-color: #D4B89A;
+  color: #5C4A3A;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.search-form button:hover { background-color: #C9A885; }
+
+/* Gợi ý kết quả khi đang gõ */
+.search-suggest {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: #fff;
+  border: 1px solid #D4B89A;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(92, 74, 58, 0.18);
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.sg-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  color: #5C4A3A;
+  text-decoration: none;
+  border-bottom: 1px solid #F1E7DC;
+}
+
+.sg-item:hover { background-color: #FAF6F1; }
+
+.sg-item img {
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.sg-name {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.sg-price {
+  font-size: 0.85rem;
+  color: #c0392b;
+  white-space: nowrap;
+}
+
+.sg-more,
+.sg-empty {
+  display: block;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  text-align: center;
+  color: #9C8070;
+  text-decoration: none;
+}
+
+.sg-more { font-weight: bold; color: #5C4A3A; }
+.sg-more:hover { background-color: #FAF6F1; }
+
 /* ===== 4. Banner ảnh chạy ===== */
 .slider {
   width: 100%;
@@ -259,6 +364,9 @@ footer {
   .nav-links { flex-wrap: wrap; width: 100%; gap: 4px; }
   .nav-links a { font-size: 0.75rem; padding: 4px 8px; }
 
+  .search-box { padding: 10px 14px; }
+  .search-form button { padding: 10px 16px; }
+
   .deco { grid-template-columns: 1fr; padding: 16px; }
   .deco figure img { height: 180px; }
 
@@ -286,6 +394,15 @@ footer {
       <a href="html/sign-in.html">Sign In / Sign Up</a>
     </div>
   </nav>
+
+  <!-- ===== Thanh tìm kiếm ===== -->
+  <div class="search-box">
+    <form class="search-form" id="searchForm" action="html/san-pham.html" method="get" autocomplete="off">
+      <input type="search" id="searchInput" name="q" placeholder=" Tìm sản phẩm: tranh, đèn học, gương..." aria-label="Tìm sản phẩm">
+      <button type="submit">Tìm kiếm</button>
+      <div class="search-suggest" id="searchSuggest"></div>
+    </form>
+  </div>
 </header>
 
 <main>
@@ -335,8 +452,102 @@ footer {
       <a href="html/lien-he.html">Liên Hệ</a>
     </div>
   </div>
-  <div class="footer-bottom">Trang web được thiết kế bởi Vũ Thị Nhựt Đang @2026 · HTML tĩnh</div>
+  <div class="footer-bottom">Trang web được thiết kế bởi Vũ Thị Nhựt Đang @2026</div>
 </footer>
+
+<!-- lib.js chứa danh sách sản phẩm + hàm tìm kiếm (searchProducts) -->
+<script src="js/user.js"></script>
+<script src="js/lib.js"></script>
+<script>
+  // Đổi "Sign In / Sign Up" thành "Xin chào, tên" (hoặc "Quản trị") khi đã đăng nhập
+  if (typeof UserLib !== "undefined") UserLib.renderLoginBar(".login-bar a", "html/");
+
+  (function () {
+    const form = document.getElementById("searchForm");
+    const input = document.getElementById("searchInput");
+    const box = document.getElementById("searchSuggest");
+    const MAX = 6; // số gợi ý tối đa
+
+    if (typeof searchProducts === "undefined") {
+      console.error("Không tìm thấy lib.js - hãy kiểm tra đường dẫn js/lib.js");
+    }
+
+    // Ảnh trong lib.js viết cho thư mục html/ ("../assets/..."), ở trang chủ phải bỏ "../"
+    const fixPath = (p) => p.replace(/^\.\.\//, "");
+    const money = (n) => n.toLocaleString("vi-VN") + " VND";
+
+    function goSearch(keyword) {
+      window.location.href = "html/san-pham.html" + (keyword ? "?q=" + encodeURIComponent(keyword) : "");
+    }
+
+    function render() {
+      const keyword = input.value.trim();
+      box.innerHTML = "";
+
+      if (keyword === "" || typeof searchProducts === "undefined") {
+        box.style.display = "none";
+        return;
+      }
+
+      const result = searchProducts(keyword);
+
+      if (result.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "sg-empty";
+        empty.textContent = "Không tìm thấy sản phẩm phù hợp.";
+        box.appendChild(empty);
+      } else {
+        result.slice(0, MAX).forEach(function (p) {
+          const a = document.createElement("a");
+          a.className = "sg-item";
+          a.href = "html/chi-tiet.html?id=" + p.id;
+
+          const img = document.createElement("img");
+          img.src = fixPath(p.img);
+          img.alt = p.name;
+
+          const name = document.createElement("span");
+          name.className = "sg-name";
+          name.textContent = p.name;
+
+          const price = document.createElement("span");
+          price.className = "sg-price";
+          price.textContent = money(p.price);
+
+          a.append(img, name, price);
+          box.appendChild(a);
+        });
+
+        if (result.length > MAX) {
+          const more = document.createElement("a");
+          more.className = "sg-more";
+          more.href = "html/san-pham.html?q=" + encodeURIComponent(keyword);
+          more.textContent = "Xem tất cả " + result.length + " kết quả »";
+          box.appendChild(more);
+        }
+      }
+      box.style.display = "block";
+    }
+
+    // Gõ đến đâu gợi ý đến đó
+    input.addEventListener("input", render);
+    input.addEventListener("focus", render);
+
+    // Bấm Enter hoặc nút "Tìm kiếm" -> sang trang sản phẩm với kết quả lọc
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      goSearch(input.value.trim());
+    });
+
+    // Bấm ra ngoài hoặc nhấn Esc -> đóng gợi ý
+    document.addEventListener("click", function (e) {
+      if (!form.contains(e.target)) box.style.display = "none";
+    });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") box.style.display = "none";
+    });
+  })();
+</script>
 
 </body>
 </html>

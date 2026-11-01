@@ -1,8 +1,3 @@
-/* =====================================================
-   TIỆM CỦA BƠ - sp.css (trang Sản Phẩm)
-   Đề tài: CSS Flexbox, CSS Grid và Responsive Web Design
-   ===================================================== */
-
 /* ---------- 1. Reset (thay cho Bootstrap) ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 body, h2, h6, p { margin: 0; }
@@ -59,6 +54,34 @@ nav {
 .nav-links a:hover,
 .nav-links a.active { background-color: #F5EDE4; }
 
+/* Khung "Xin chào / Đăng xuất" nằm sát góc phải (cột 3 của lưới nav) */
+.nav-links { white-space: nowrap; }
+
+.nav-user {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #5C4A3A;
+}
+
+.nav-user span { font-weight: bold; }
+
+.nav-user a {
+  color: #5C4A3A;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.95rem;
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.nav-user a:hover { background-color: #F5EDE4; }
+
 /* ---------- 4. Nút (thay cho class .btn của Bootstrap) ---------- */
 .btn {
   display: inline-block;
@@ -112,8 +135,9 @@ h2 {
   font-size: clamp(1.1rem, 2.5vw, 1.4rem);   /* chữ co giãn mượt */
   font-weight: bold;
   color: #6B4F4F;
-  border-bottom: 2px solid #F7C5CC;
-  margin: 0 28px 20px;
+  border-bottom: 3px solid #F7C5CC;
+  margin: 0 520px 20px;
+  
 }
 
 /* ---------- 6. GRID: lưới sản phẩm ----------
@@ -210,6 +234,7 @@ footer {
   nav { padding: 12px 20px; }
   .nav-brand { font-size: 1.25rem; }
   .nav-links a { font-size: 0.875rem; padding: 6px 10px; }
+  .nav-user, .nav-user a { font-size: 0.875rem; }
   .login-bar { font-size: 0.8rem; }
 
   .deco { gap: 16px; padding: 16px 20px 32px; }
@@ -229,6 +254,8 @@ footer {
   .nav-brand { font-size: 1rem; }
   .nav-links { flex-wrap: wrap; width: 100%; gap: 4px; }
   .nav-links a { font-size: 0.75rem; padding: 4px 8px; }
+  .nav-user { width: 100%; justify-self: auto; justify-content: flex-start; gap: 8px; }
+  .nav-user, .nav-user a { font-size: 0.75rem; }
 
   .deco { grid-template-columns: 1fr; padding: 16px; }
   .deco figure img { height: 180px; }

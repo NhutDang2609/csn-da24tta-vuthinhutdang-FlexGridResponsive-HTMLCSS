@@ -1,78 +1,108 @@
+// =====================================================================
+//  Trang danh mục sản phẩm dành cho KHÁCH (ví dụ: Treo Tường)
+// =====================================================================
+// - Không còn danh sách sản phẩm riêng trong file này. Sản phẩm lấy từ lib.js (productDatabase)
+//   và chỉ hiện những sản phẩm thuộc danh mục của trang. Nhờ vậy khi quản trị viên thêm / sửa / xóa
+//   ở trang quan-tri.html thì trang này tự cập nhật.
+// - Khách chỉ có 2 nút: "Xem chi tiết" và "Mua ngay".
+// - Danh mục đọc từ thẻ <body data-category="...">:
+//       tuong = Decor tường | ban = Decor bàn | phong = Decor phòng | hoctap = Góc học tập
+//   Có thể dùng chung file này cho cả 4 trang danh mục, chỉ cần đổi data-category.
+// - Cần nhúng user.js và lib.js TRƯỚC file này.
+(function () {
+  const DANH_MUC = document.body.dataset.category || "tuong";
 
-
-//treo
- const productDatabase = [
-  {id:14, name:"Tranh Con Voi Sơn Dầu", price:2000000, img:"../assets/treo3.jpg", productLink:"chi-tiet.html", desc:"Tranh con voi sơn dầu không chỉ là một tác phẩm nghệ thuật mà còn mang trong mình những giá trị phong thủy sâu sắc."},
-  {id:15, name:"Phù Điêu 3D Mộc Lan Ngọc Xuân Ý", price:2000000, img:"../assets/treo9.jpg", productLink:"chi-tiet.html", desc:"Phù điêu treo tường hoa mẫu đơn trong gió mang vẻ đẹp tinh tế và phong thủy tốt đẹp."},
-
-
-  {id:16, name:"Đồng Hồ Morandi Tối Giản Hiện Đại", price:1600000, img:"../assets/treo4.jpg", productLink:"chi-tiet.html", desc:"Đồng hồ Morandi tối giản hiện đại mang phong cách tinh tế, sang trọng cho không gian sống."},
-  {id:19, name:"Gương Tròn Hiện Đại", price:6000000, img:"../assets/treo10.jpg", productLink:"chi-tiet.html", desc:"Gương tròn hiện đại mang lại vẻ đẹp tinh tế cho không gian sống."},
-  {id:20, name:"Đồng Hồ Treo Tường Hình Ngọn Núi", price:1500000, img:"../assets/treo5.jpg", productLink:"chi-tiet.html", desc:"Trong thiết kế nội thất hiện đại, đồng hồ treo tường hình ngọn núi là món đồ decor được ưa chuộng."},
-  
-{id:22, name:"Tranh In Sơn Dầu Xoáy Cầu Thang", price:1500000, img:"../assets/treo2.jpg", productLink:"chi-tiet.html", desc:"Trong phong thủy, hình xoáy cầu thang tượng trưng cho sự phát triển không ngừng, thu hút tài lộc và vận may."},
-  {id:25, name:"Tranh 3 Chiều Bằng Gỗ Nguyên Khối", price:1800000, img:"../assets/treo1.jpg", productLink:"chi-tiet.html", desc:"Mang vẻ đẹp tự nhiên và sang trọng vào không gian sống với tranh 3 chiều được chế tác từ gỗ nguyên khối cao cấp."},
-
-  {id:17, name:"Phù Điêu Dải Hoa Vàng 3D", price:3000000, img:"../assets/treo7.jpg", productLink:"chi-tiet.html", desc:"Phù điêu dải hoa vàng 3D mang vẻ đẹp nghệ thuật và giá trị phong thủy cho không gian sống."},
-  {id:18, name:"Phù Điêu 3D Đầu Ngựa", price:8000000, img:"../assets/treo8.jpg", productLink:"chi-tiet.html", desc:"Phù điêu 3D đầu ngựa không chỉ đẹp mắt mà còn mang lại nhiều ý nghĩa phong thủy tốt cho không gian."},
-  
-
-  {id:21, name:"Gương Tròn Trang Trí Phòng Khách", price:5500000, img:"../assets/treo11.jpg", productLink:"chi-tiet.html", desc:"Gương tròn decor là món đồ trang trí không thể thiếu trong không gian phòng khách hiện đại."},
-{id:23, name:"Đồng Hồ Treo Tường Bản Đồ Thế Giới", price:2900000, img:"../assets/treo6.jpg", productLink:"chi-tiet.html", desc:"Đồng hồ treo tường bản đồ thế giới từ Decorpro là sự lựa chọn lý tưởng cho những ai yêu thích sự độc đáo."},
-
-
-  {id:24, name:"Gương Trang Trí Hình Bông Hoa Đẹp", price:3800000, img:"../assets/treo12.jpg", productLink:"chi-tiet.html", desc:"Gương trang trí hình bông hoa đang trở thành xu hướng hot nhờ thiết kế sang trọng và tinh tế."}
-
-
-];
- 
-
-
-
-
-
-
-function addProduct_v2(product) {
   const container = document.getElementById("product-list");
-  if (!container) return;
+  const fPrice = document.getElementById("f-price");
+  const fSort = document.getElementById("f-sort");
+  container.className = "row";
 
-  const myDiv = document.createElement("div");
-  myDiv.setAttribute("class", "product-item col-sm-4 mb-4");
+  const PRICE_FILTERS = {
+    "duoi200":   (p) => p < 200000,
+    "200-1000":  (p) => p >= 200000 && p <= 1000000,
+    "1000-3000": (p) => p > 1000000 && p <= 3000000,
+    "tren3000":  (p) => p > 3000000,
+  };
+  const SORTERS = {
+    "gia-tang": (a, b) => a.price - b.price,
+    "gia-giam": (a, b) => b.price - a.price,
+    "ten":      (a, b) => a.name.localeCompare(b.name, "vi"),
+  };
 
-  const myDiv1 = document.createElement("div");
-  myDiv1.setAttribute("class", "product-image");
-
-  const productImg = document.createElement("img");
-  productImg.setAttribute("src", product.img);
-  productImg.setAttribute("alt", product.name);
-  productImg.setAttribute("class", "img-fluid");
-
-  myDiv1.appendChild(productImg);
-  myDiv.appendChild(myDiv1);
-
-  const myDiv2 = document.createElement("div");
-  myDiv2.setAttribute("class", "product-info");
-
-  const myP1 = document.createElement("p");
-  myP1.textContent = product.name;
-
-  const myP2 = document.createElement("p");
-  myP2.textContent = product.price.toLocaleString() + " VND";
-
-  const myLink = document.createElement("a");
-  myLink.setAttribute("href", product.productLink + "?id=" + product.id);
-  myLink.setAttribute("class", "btn btn-info");
-  myLink.textContent = "Xem chi tiết";
-
-  myDiv2.appendChild(myP1);
-  myDiv2.appendChild(myP2);
-  myDiv2.appendChild(myLink);
-  myDiv.appendChild(myDiv2);
-  container.appendChild(myDiv);
-}
-
-function loadProducts(products) {
-  for (let i = 0; i < products.length; i++) {
-    addProduct_v2(products[i]);
+  // Lấy lại lựa chọn từ địa chỉ trang, ví dụ san-pham-tuong.html?price=duoi200&sort=gia-tang
+  function docBoLocTuUrl() {
+    const sp = new URLSearchParams(window.location.search);
+    const gan = (sel, val) => { if ([...sel.options].some((o) => o.value === val)) sel.value = val; };
+    gan(fPrice, sp.get("price") || "");
+    gan(fSort, sp.get("sort") || "");
   }
-}
+
+  // Ghi lựa chọn lên địa chỉ trang (tải lại trang vẫn giữ bộ lọc)
+  function ghiBoLocLenUrl() {
+    try {
+      const url = new URL(window.location.href);
+      [["price", fPrice.value], ["sort", fSort.value]].forEach(function (kv) {
+        if (kv[1]) url.searchParams.set(kv[0], kv[1]); else url.searchParams.delete(kv[0]);
+      });
+      window.history.replaceState(null, "", url);
+    } catch (e) { /* mở bằng file:// thì bỏ qua */ }
+  }
+
+  function hienThi() {
+    // Chỉ lấy sản phẩm thuộc danh mục của trang này
+    const trongMuc = productDatabase.filter((p) => p.category === DANH_MUC);
+
+    let visible = trongMuc.slice();
+    if (fPrice.value) visible = visible.filter((p) => PRICE_FILTERS[fPrice.value](p.price));
+    if (fSort.value) visible.sort(SORTERS[fSort.value]);
+    ghiBoLocLenUrl();
+
+    document.getElementById("filter-count").textContent =
+      fPrice.value ? "Hiển thị " + visible.length + " / " + trongMuc.length + " sản phẩm" : "";
+
+    container.innerHTML = "";
+    if (trongMuc.length === 0) {
+      container.innerHTML = "<p class='text-center'>Hiện chưa có sản phẩm nào trong mục này.</p>";
+      return;
+    }
+    if (visible.length === 0) {
+      container.innerHTML = "<p class='text-center'>Không có sản phẩm nào phù hợp với bộ lọc. Hãy thử chọn mức giá khác.</p>";
+      return;
+    }
+
+    visible.forEach(function (product) {
+      const col = document.createElement("div");
+      col.className = "col-6 col-md-4 col-lg-3 mb-4";
+      col.innerHTML = `
+        <div class="card h-100">
+          <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" class="card-img-top" style="height:180px; object-fit:cover;">
+          <div class="card-body">
+            <h6 class="card-title">${escapeHtml(product.name)}</h6>
+            <p class="card-text text-danger fw-bold">${product.price.toLocaleString()} VND</p>
+            <a href="chi-tiet.html?id=${product.id}" class="btn btn-sm btn-outline-secondary w-100 mb-2">Xem chi tiết</a>
+            <button onclick="buyNow(${product.id})" class="btn btn-sm btn-danger w-100">Mua ngay</button>
+          </div>
+        </div>`;
+      container.appendChild(col);
+    });
+  }
+
+  [fPrice, fSort].forEach((el) => el.addEventListener("change", hienThi));
+  document.getElementById("f-reset").addEventListener("click", function () {
+    fPrice.value = "";
+    fSort.value = "";
+    hienThi();
+  });
+
+  // Chờ lib.js ghép xong dữ liệu (kể cả thay đổi của quản trị viên) rồi mới hiển thị
+  productReady.then(function () {
+    docBoLocTuUrl();
+    hienThi();
+  });
+
+  // Nút "Mua ngay" gọi buyNow(id) trong lib.js:
+  //  - đã đăng nhập  -> sang trang mua-hang.html
+  //  - chưa đăng nhập -> báo và chuyển sang trang đăng nhập
+  // Hiện "Xin chào, tên" + Đăng xuất (hoặc "Quản trị") trên menu
+  if (typeof UserLib !== "undefined") UserLib.renderNavUser();
+})();

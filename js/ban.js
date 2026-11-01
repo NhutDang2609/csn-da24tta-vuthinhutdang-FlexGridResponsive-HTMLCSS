@@ -1,80 +1,108 @@
+// =====================================================================
+//  Trang danh mục sản phẩm dành cho KHÁCH (ví dụ: Treo Tường)
+// =====================================================================
+// - Không còn danh sách sản phẩm riêng trong file này. Sản phẩm lấy từ lib.js (productDatabase)
+//   và chỉ hiện những sản phẩm thuộc danh mục của trang. Nhờ vậy khi quản trị viên thêm / sửa / xóa
+//   ở trang quan-tri.html thì trang này tự cập nhật.
+// - Khách chỉ có 2 nút: "Xem chi tiết" và "Mua ngay".
+// - Danh mục đọc từ thẻ <body data-category="...">:
+//       tuong = Decor tường | ban = Decor bàn | phong = Decor phòng | hoctap = Góc học tập
+//   Có thể dùng chung file này cho cả 4 trang danh mục, chỉ cần đổi data-category.
+// - Cần nhúng user.js và lib.js TRƯỚC file này.
+(function () {
+  const DANH_MUC = document.body.dataset.category || "ban";
 
-
-//ban
- const productDatabase = [
- {id:31, name:"Thác Khói Trầm Hương", price:4000000, img:"../assets/b1.jpg", productLink:"chi-tiet.html", desc:"Thác khói trầm hương với thiết kế tinh xảo, tạo dòng khói mềm mại như thác nước, mang đến cảm giác thư thái và bình yên cho không gian sống."},
-
-{id:33, name:"Bình Hoa Gốm Vân Tổ Ong", price:5500000, img:"../assets/b2.jpg", productLink:"chi-tiet.html", desc:"Bình hoa gốm vân tổ ong sở hữu thiết kế độc đáo cùng họa tiết nổi bật, là điểm nhấn tinh tế cho phòng khách, phòng ngủ hoặc góc làm việc."},
-
-{id:34, name:"Bình Cắm Hoa Khô Sang Trọng", price:2150000, img:"../assets/b3.jpg", productLink:"chi-tiet.html", desc:"Bình cắm hoa khô sang trọng với kiểu dáng hiện đại, giúp tôn lên vẻ đẹp của hoa và mang lại sự ấm áp cho không gian nội thất."},
-
-{id:30, name:"Bình Hoa Nghệ Thuật Trang Trí Kệ Tủ", price:2100000, img:"../assets/b4.jpg", productLink:"chi-tiet.html", desc:"Bình hoa nghệ thuật trang trí kệ tủ được thiết kế thanh lịch, phù hợp với nhiều phong cách decor từ hiện đại đến tối giản."},
-
-{id:35, name:"Lá Sung Nghệ Thuật Đặt Bàn", price:2000000, img:"../assets/b5.jpg", productLink:"chi-tiet.html", desc:"Lá sung nghệ thuật đặt bàn mang vẻ đẹp tự nhiên và ý nghĩa phong thủy tốt lành, giúp không gian thêm sang trọng và hài hòa."},
-
-{id:32, name:"Cặp Hươu Sừng Tấm", price:905000, img:"../assets/b6.jpg", productLink:"chi-tiet.html", desc:"Cặp hươu sừng tấm tượng trưng cho sự may mắn, tài lộc và thịnh vượng, thích hợp làm vật trang trí hoặc quà tặng ý nghĩa."},
-
-{id:36, name:"Bộ Hoa Bằng Đá Thạch Anh", price:900000, img:"../assets/b8.jpg", productLink:"chi-tiet.html", desc:"Bộ hoa bằng đá thạch anh mang vẻ đẹp sang trọng cùng năng lượng tích cực, giúp không gian trở nên nổi bật và cuốn hút hơn."},
-
-{id:27, name:"Chim Vàng Trên Quả Cầu Pha Lê", price:2000000, img:"../assets/b7.jpg", productLink:"chi-tiet.html", desc:"Chim vàng trên quả cầu pha lê là sự kết hợp hài hòa giữa nghệ thuật và phong thủy, tạo điểm nhấn đẳng cấp cho không gian sống."},
-
-{id:28, name:"Thác Khói Trầm Hương Địa Tạng Vương Từ Bi An Lạc", price:2000000, img:"../assets/b9.jpg", productLink:"chi-tiet.html", desc:"Thác khói trầm hương Địa Tạng Vương Từ Bi An Lạc mang ý nghĩa bình an, thanh tịnh và giúp tạo bầu không khí thư giãn cho ngôi nhà."},
-
-{id:29, name:"Tượng Đầu Ngựa Tối Giản", price:800000, img:"../assets/10.jpg", productLink:"chi-tiet.html", desc:"Tượng đầu ngựa tối giản sở hữu thiết kế hiện đại, mạnh mẽ và tinh tế, tượng trưng cho sự thành công và phát triển bền vững."},
-
-{id:26, name:"Mô Hình Đá Kết Hợp Động Vật", price:2000000, img:"../assets/b11.jpg", productLink:"chi-tiet.html", desc:"Mô hình đá kết hợp động vật được chế tác độc đáo, mang vẻ đẹp nghệ thuật và tạo điểm nhấn nổi bật cho bàn làm việc hoặc kệ trang trí."},
-
-{id:37, name:"Quả Địa Cầu Pha Lê", price:1800000, img:"../assets/b12.jpg", productLink:"chi-tiet.html", desc:"Quả địa cầu pha lê với thiết kế sang trọng và trong suốt, là món đồ decor tinh tế dành cho phòng khách, văn phòng hoặc góc học tập."}
-
-];
- 
-
-
-
-
-
-
-function addProduct_v2(product) {
   const container = document.getElementById("product-list");
-  if (!container) return;
+  const fPrice = document.getElementById("f-price");
+  const fSort = document.getElementById("f-sort");
+  container.className = "row";
 
-  const myDiv = document.createElement("div");
-  myDiv.setAttribute("class", "product-item col-sm-4 mb-4");
+  const PRICE_FILTERS = {
+    "duoi200":   (p) => p < 200000,
+    "200-1000":  (p) => p >= 200000 && p <= 1000000,
+    "1000-3000": (p) => p > 1000000 && p <= 3000000,
+    "tren3000":  (p) => p > 3000000,
+  };
+  const SORTERS = {
+    "gia-tang": (a, b) => a.price - b.price,
+    "gia-giam": (a, b) => b.price - a.price,
+    "ten":      (a, b) => a.name.localeCompare(b.name, "vi"),
+  };
 
-  const myDiv1 = document.createElement("div");
-  myDiv1.setAttribute("class", "product-image");
-
-  const productImg = document.createElement("img");
-  productImg.setAttribute("src", product.img);
-  productImg.setAttribute("alt", product.name);
-  productImg.setAttribute("class", "img-fluid");
-
-  myDiv1.appendChild(productImg);
-  myDiv.appendChild(myDiv1);
-
-  const myDiv2 = document.createElement("div");
-  myDiv2.setAttribute("class", "product-info");
-
-  const myP1 = document.createElement("p");
-  myP1.textContent = product.name;
-
-  const myP2 = document.createElement("p");
-  myP2.textContent = product.price.toLocaleString() + " VND";
-
-  const myLink = document.createElement("a");
-  myLink.setAttribute("href", product.productLink + "?id=" + product.id);
-  myLink.setAttribute("class", "btn btn-info");
-  myLink.textContent = "Xem chi tiết";
-
-  myDiv2.appendChild(myP1);
-  myDiv2.appendChild(myP2);
-  myDiv2.appendChild(myLink);
-  myDiv.appendChild(myDiv2);
-  container.appendChild(myDiv);
-}
-
-function loadProducts(products) {
-  for (let i = 0; i < products.length; i++) {
-    addProduct_v2(products[i]);
+  // Lấy lại lựa chọn từ địa chỉ trang, ví dụ san-pham-tuong.html?price=duoi200&sort=gia-tang
+  function docBoLocTuUrl() {
+    const sp = new URLSearchParams(window.location.search);
+    const gan = (sel, val) => { if ([...sel.options].some((o) => o.value === val)) sel.value = val; };
+    gan(fPrice, sp.get("price") || "");
+    gan(fSort, sp.get("sort") || "");
   }
-}
+
+  // Ghi lựa chọn lên địa chỉ trang (tải lại trang vẫn giữ bộ lọc)
+  function ghiBoLocLenUrl() {
+    try {
+      const url = new URL(window.location.href);
+      [["price", fPrice.value], ["sort", fSort.value]].forEach(function (kv) {
+        if (kv[1]) url.searchParams.set(kv[0], kv[1]); else url.searchParams.delete(kv[0]);
+      });
+      window.history.replaceState(null, "", url);
+    } catch (e) { /* mở bằng file:// thì bỏ qua */ }
+  }
+
+  function hienThi() {
+    // Chỉ lấy sản phẩm thuộc danh mục của trang này
+    const trongMuc = productDatabase.filter((p) => p.category === DANH_MUC);
+
+    let visible = trongMuc.slice();
+    if (fPrice.value) visible = visible.filter((p) => PRICE_FILTERS[fPrice.value](p.price));
+    if (fSort.value) visible.sort(SORTERS[fSort.value]);
+    ghiBoLocLenUrl();
+
+    document.getElementById("filter-count").textContent =
+      fPrice.value ? "Hiển thị " + visible.length + " / " + trongMuc.length + " sản phẩm" : "";
+
+    container.innerHTML = "";
+    if (trongMuc.length === 0) {
+      container.innerHTML = "<p class='text-center'>Hiện chưa có sản phẩm nào trong mục này.</p>";
+      return;
+    }
+    if (visible.length === 0) {
+      container.innerHTML = "<p class='text-center'>Không có sản phẩm nào phù hợp với bộ lọc. Hãy thử chọn mức giá khác.</p>";
+      return;
+    }
+
+    visible.forEach(function (product) {
+      const col = document.createElement("div");
+      col.className = "col-6 col-md-4 col-lg-3 mb-4";
+      col.innerHTML = `
+        <div class="card h-100">
+          <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" class="card-img-top" style="height:180px; object-fit:cover;">
+          <div class="card-body">
+            <h6 class="card-title">${escapeHtml(product.name)}</h6>
+            <p class="card-text text-danger fw-bold">${product.price.toLocaleString()} VND</p>
+            <a href="chi-tiet.html?id=${product.id}" class="btn btn-sm btn-outline-secondary w-100 mb-2">Xem chi tiết</a>
+            <button onclick="buyNow(${product.id})" class="btn btn-sm btn-danger w-100">Mua ngay</button>
+          </div>
+        </div>`;
+      container.appendChild(col);
+    });
+  }
+
+  [fPrice, fSort].forEach((el) => el.addEventListener("change", hienThi));
+  document.getElementById("f-reset").addEventListener("click", function () {
+    fPrice.value = "";
+    fSort.value = "";
+    hienThi();
+  });
+
+  // Chờ lib.js ghép xong dữ liệu (kể cả thay đổi của quản trị viên) rồi mới hiển thị
+  productReady.then(function () {
+    docBoLocTuUrl();
+    hienThi();
+  });
+
+  // Nút "Mua ngay" gọi buyNow(id) trong lib.js:
+  //  - đã đăng nhập  -> sang trang mua-hang.html
+  //  - chưa đăng nhập -> báo và chuyển sang trang đăng nhập
+  // Hiện "Xin chào, tên" + Đăng xuất (hoặc "Quản trị") trên menu
+  if (typeof UserLib !== "undefined") UserLib.renderNavUser();
+})();
