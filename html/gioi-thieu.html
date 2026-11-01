@@ -303,6 +303,48 @@ footer {
 
   .intro-thanks { margin: 26px 14px 36px; padding: 20px 18px; }
 }
+
+
+
+/* ===== Sửa vị trí thông tin tài khoản trên điện thoại ===== */
+@media (max-width: 860px) {
+  nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Ẩn menu và thông tin tài khoản khi chưa mở */
+  .nav-links,
+  .nav-user {
+    display: none;
+    width: 100%;
+  }
+
+  /* Khi mở hamburger, hiển thị menu */
+  .nav-toggle:checked ~ .nav-links {
+    display: flex;
+  }
+
+  /* Hiển thị tài khoản ngay bên dưới các mục menu */
+  .nav-toggle:checked ~ .nav-user {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 10px;
+    font-size: 15px;
+    border-top: 1px solid #D4B89A;
+  }
+
+  .nav-user a {
+    padding: 0;
+    font-size: 15px;
+  }
+}
   </style>
   <link rel="stylesheet" href="../css/style-nav.css">
 </head>
