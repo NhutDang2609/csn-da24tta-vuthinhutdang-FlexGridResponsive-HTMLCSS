@@ -355,12 +355,20 @@ footer {
   }
 
   .nav-links {
+    /* Mặc định ẩn menu trên điện thoại */
+    display: none;
     position: static;
     transform: none;
-    flex-wrap: wrap;
+    flex-direction: column;
+    flex-wrap: nowrap;
     justify-content: flex-start;
     width: 100%;
-    gap: 4px;
+    gap: 0;
+  }
+
+  /* Chỉ hiện menu khi checkbox được bật */
+  .nav-toggle:checked ~ .nav-links {
+    display: flex;
   }
 
   .nav-links a {
