@@ -80,6 +80,24 @@
     border-bottom: 1px solid rgba(212, 184, 154, 0.6);
   }
 
+  /* Thông tin tài khoản nằm bên trong menu xổ xuống trên điện thoại */
+  .nav-links .nav-user {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 10px;
+    white-space: normal;
+    font-size: 13px;
+    border-top: 1px solid rgba(212, 184, 154, 0.6);
+  }
+
+  .nav-links .nav-user span {
+    font-size: 13px;
+  }
+
   .login-bar {
     justify-self: auto;
     justify-content: flex-start;
@@ -355,20 +373,12 @@ footer {
   }
 
   .nav-links {
-    /* Mặc định ẩn menu trên điện thoại */
-    display: none;
     position: static;
     transform: none;
-    flex-direction: column;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     justify-content: flex-start;
     width: 100%;
-    gap: 0;
-  }
-
-  /* Chỉ hiện menu khi checkbox được bật */
-  .nav-toggle:checked ~ .nav-links {
-    display: flex;
+    gap: 4px;
   }
 
   .nav-links a {
@@ -489,19 +499,26 @@ footer {
 </div>
 
 <script>
-  // Đưa "Xin chào / Đăng xuất" sang khung bên phải (.nav-user)
+  // Đưa thông tin "Xin chào / Đăng xuất" vào cuối danh sách menu.
   (function () {
     var links = document.querySelector(".nav-links");
     var box = document.querySelector(".nav-user");
-    var soMucGoc = links.children.length; // 4 mục menu gốc
-    function chuyen() {
-      while (links.children.length > soMucGoc) {
-        box.appendChild(links.children[soMucGoc]);
+
+    function chuyenThongTinTaiKhoan() {
+      while (box.firstChild) {
+        links.appendChild(box.firstChild);
       }
     }
-    new MutationObserver(chuyen).observe(links, { childList: true });
+
+    // Hiển thị thông tin tài khoản trước, sau đó chuyển vào menu.
     if (typeof UserLib !== "undefined") UserLib.renderNavUser();
-    chuyen();
+    chuyenThongTinTaiKhoan();
+
+    // Theo dõi nếu UserLib cập nhật nội dung đăng nhập/đăng xuất.
+    new MutationObserver(chuyenThongTinTaiKhoan).observe(box, {
+      childList: true,
+      subtree: true
+    });
   })();
 
   document.getElementById("frmContact").addEventListener("submit", function(e) {
