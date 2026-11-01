@@ -5,9 +5,101 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/style-signin.css">
-      <link rel="stylesheet" href="../css/style-nav.css">
+      
 
     <style>
+/* ===== Menu ☰ trên điện thoại ===== */
+.nav-toggle {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.nav-burger { display: none; }
+
+@media (max-width: 860px) {
+  nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0;
+    padding: 8px 14px;
+    position: relative;
+  }
+
+  .nav-brand { font-size: 18px; }
+
+  .nav-burger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    font-size: 26px;
+    line-height: 1;
+    color: #5C4A3A;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-burger::before { content: "\2630"; }
+  .nav-toggle:checked + .nav-burger::before { content: "\2715"; }
+  .nav-burger:hover { background-color: #F5EDE4; }
+  .nav-toggle:focus-visible + .nav-burger { outline: 3px solid #D4B89A; }
+
+  .nav-links,
+  .login-bar { display: none; width: 100%; }
+
+  .nav-toggle:checked ~ .nav-links,
+  .nav-toggle:checked ~ .login-bar { display: flex; }
+
+  .nav-links {
+    position: static;
+    transform: none;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0;
+    margin-top: 6px;
+    border-top: 1px solid #D4B89A;
+  }
+
+  .nav-links a {
+    display: block;
+    width: 100%;
+    padding: 13px 10px;
+    font-size: 15px;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(212, 184, 154, 0.6);
+  }
+
+  .login-bar {
+    justify-self: auto;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 10px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  input:not([type="radio"]):not([type="checkbox"]),
+  select,
+  textarea { font-size: 16px !important; }
+}
+
+
+
+
+
+
+
       .order-wrap { max-width: 760px; margin: 20px auto; padding: 0 16px; }
       .order-box { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 20px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
       .order-box h4 { margin: 0 0 14px; }
@@ -83,6 +175,9 @@
 
     <nav>
       <a class="nav-brand" href="../index.html">🌸 Tiệm của Bơ</a>
+<input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Mở hoặc đóng menu">
+   <label for="nav-toggle" class="nav-burger" aria-hidden="true"></label>
+
       <div class="nav-links">
         <a href="../index.html">Trang Chủ</a>
         <a href="gioi-thieu.html">Giới Thiệu</a>
