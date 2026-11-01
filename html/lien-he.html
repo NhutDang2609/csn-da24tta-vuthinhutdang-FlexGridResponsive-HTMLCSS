@@ -80,24 +80,6 @@
     border-bottom: 1px solid rgba(212, 184, 154, 0.6);
   }
 
-  /* Thông tin tài khoản nằm bên trong menu xổ xuống trên điện thoại */
-  .nav-links .nav-user {
-    display: flex;
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 10px;
-    white-space: normal;
-    font-size: 13px;
-    border-top: 1px solid rgba(212, 184, 154, 0.6);
-  }
-
-  .nav-links .nav-user span {
-    font-size: 13px;
-  }
-
   .login-bar {
     justify-self: auto;
     justify-content: flex-start;
@@ -373,12 +355,20 @@ footer {
   }
 
   .nav-links {
+    /* Mặc định ẩn menu trên điện thoại */
+    display: none;
     position: static;
     transform: none;
-    flex-wrap: wrap;
+    flex-direction: column;
+    flex-wrap: nowrap;
     justify-content: flex-start;
     width: 100%;
-    gap: 4px;
+    gap: 0;
+  }
+
+  /* Chỉ hiện menu khi checkbox được bật */
+  .nav-toggle:checked ~ .nav-links {
+    display: flex;
   }
 
   .nav-links a {
@@ -419,6 +409,47 @@ footer {
   .footer-links {
     flex-wrap: wrap;
     gap: 10px;
+  }
+}
+
+
+/* ===== Sửa vị trí thông tin tài khoản trên điện thoại ===== */
+@media (max-width: 860px) {
+  nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Ẩn menu và thông tin tài khoản khi chưa mở */
+  .nav-links,
+  .nav-user {
+    display: none;
+    width: 100%;
+  }
+
+  /* Khi mở hamburger, hiển thị menu */
+  .nav-toggle:checked ~ .nav-links {
+    display: flex;
+  }
+
+  /* Hiển thị tài khoản ngay bên dưới các mục menu */
+  .nav-toggle:checked ~ .nav-user {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 10px;
+    font-size: 15px;
+    border-top: 1px solid #D4B89A;
+  }
+
+  .nav-user a {
+    padding: 0;
+    font-size: 15px;
   }
 }
   </style>
@@ -499,26 +530,19 @@ footer {
 </div>
 
 <script>
-  // Đưa thông tin "Xin chào / Đăng xuất" vào cuối danh sách menu.
+  // Đưa "Xin chào / Đăng xuất" sang khung bên phải (.nav-user)
   (function () {
     var links = document.querySelector(".nav-links");
     var box = document.querySelector(".nav-user");
-
-    function chuyenThongTinTaiKhoan() {
-      while (box.firstChild) {
-        links.appendChild(box.firstChild);
+    var soMucGoc = links.children.length; // 4 mục menu gốc
+    function chuyen() {
+      while (links.children.length > soMucGoc) {
+        box.appendChild(links.children[soMucGoc]);
       }
     }
-
-    // Hiển thị thông tin tài khoản trước, sau đó chuyển vào menu.
+    new MutationObserver(chuyen).observe(links, { childList: true });
     if (typeof UserLib !== "undefined") UserLib.renderNavUser();
-    chuyenThongTinTaiKhoan();
-
-    // Theo dõi nếu UserLib cập nhật nội dung đăng nhập/đăng xuất.
-    new MutationObserver(chuyenThongTinTaiKhoan).observe(box, {
-      childList: true,
-      subtree: true
-    });
+    chuyen();
   })();
 
   document.getElementById("frmContact").addEventListener("submit", function(e) {
