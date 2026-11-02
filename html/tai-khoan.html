@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TÀI KHOẢN CỦA TÔI</title>
+  <link rel="stylesheet" href="../css/style-tk.css">
+  <link rel="stylesheet" href="../css/style-nav.css">
+  <script src="../js/user.js"></script>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="../index.html">🌸 Tiệm của Bơ</a>
+  <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Mở hoặc đóng menu">
+  <label for="nav-toggle" class="nav-burger" aria-hidden="true"></label>
+
+  <div class="nav-links">
+    <a href="../index.html">Trang Chủ</a>
+    <a href="gioi-thieu.html">Giới Thiệu</a>
+    <a href="san-pham.html">Sản Phẩm</a>
+    <a href="lien-he.html">Liên Hệ</a>
+  </div>
+  <div class="nav-user"></div>
+</nav>
+
+<main>
+  <h2 class="page-title">Tài Khoản Của Tôi</h2>
+
+  <div class="account-layout">
+
+    <!-- Cột trái: thông tin tóm tắt + menu -->
+    <aside class="card profile-side">
+      <div class="profile-head">
+        <div class="avatar" id="avatar">B</div>
+        <div class="profile-name" id="sideName"></div>
+        <div class="profile-email" id="sideEmail"></div>
+        <div class="profile-since" id="sideSince"></div>
+      </div>
+      <div class="side-menu">
+        <button type="button" class="active" data-tab="tab-info">👤 Thông tin cá nhân</button>
+        <button type="button" data-tab="tab-pass"> Đổi mật khẩu</button>
+        <button type="button" data-tab="tab-orders"> Đơn hàng của tôi</button>
+        <button type="button" class="btn-logout" id="btnLogout">Đăng xuất</button>
+      </div>
+    </aside>
+
+    <!-- Cột phải: nội dung -->
+    <section>
+
+      <!-- Thông tin cá nhân -->
+      <div class="card tab show" id="tab-info">
+        <h3>Thông tin cá nhân</h3>
+        <div class="msg" id="msgInfo"></div>
+        <form id="frmInfo" class="form-grid">
+          <div class="form-group full">
+            <label for="txtEmail">Email (không thể thay đổi)</label>
+            <input type="email" id="txtEmail" readonly>
+          </div>
+          <div class="form-group full">
+            <label for="txtHoTen">Họ tên</label>
+            <input type="text" id="txtHoTen" required>
+          </div>
+          <div class="form-group">
+            <label>Giới tính</label>
+            <div class="rdgioitinh">
+              <label><input type="radio" name="rdGioiTinh" value="Nam"> Nam</label>
+              <label><input type="radio" name="rdGioiTinh" value="Nữ"> Nữ</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="txtDT">Số điện thoại</label>
+            <input type="text" id="txtDT" inputmode="numeric" required>
+          </div>
+          <div class="full"><button type="submit" class="button">Lưu thay đổi</button></div>
+        </form>
+      </div>
+
+      <!-- Đổi mật khẩu -->
+      <div class="card tab" id="tab-pass">
+        <h3>Đổi mật khẩu</h3>
+        <div class="msg" id="msgPass"></div>
+        <form id="frmPass" class="form-grid">
+          <div class="form-group full">
+            <label for="txtOld">Mật khẩu hiện tại</label>
+            <input type="password" id="txtOld" required>
+          </div>
+          <div class="form-group">
+            <label for="txtNew">Mật khẩu mới</label>
+            <input type="password" id="txtNew" required>
+          </div>
+          <div class="form-group">
+            <label for="txtNew2">Xác nhận mật khẩu mới</label>
+            <input type="password" id="txtNew2" required>
+          </div>
+          <div class="full"><button type="submit" class="button">Đổi mật khẩu</button></div>
+        </form>
+      </div>
+
+      <!-- Đơn hàng -->
+      <div class="card tab" id="tab-orders">
+        <h3>Đơn hàng của tôi</h3>
+        <div class="orders" id="orderList"></div>
+      </div>
+
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">🌸 Tiệm của Bơ</div>
+      <div class="footer-sub">Mang vẻ đẹp vào không gian sống của bạn</div>
+    </div>
+    <div class="footer-links">
+      <a href="../index.html">Trang Chủ</a>
+      <a href="gioi-thieu.html">Giới Thiệu</a>
+      <a href="san-pham.html">Sản Phẩm</a>
+      <a href="lien-he.html">Liên Hệ</a>
+    </div>
+  </div>
+  <div class="footer-bottom">Trang web được thiết kế bởi Vũ Thị Nhựt Đang @2026</div>
+</footer>
+
+<script>
+  // Chưa đăng nhập -> chuyển sang trang đăng nhập, đăng nhập xong quay lại đây
+  UserLib.requireLogin();
+
+  (function () {
+    const $ = (id) => document.getElementById(id);
+    const user = UserLib.getUserFull();
+    if (!user) return;
+
+    // ----- Đưa "Xin chào / Đăng xuất" sang khung bên phải (.nav-user) -----
+    (function () {
+      const links = document.querySelector(".nav-links");
+      const box = document.querySelector(".nav-user");
+      const soMucGoc = links.children.length;
+      function chuyen() {
+        while (links.children.length > soMucGoc) box.appendChild(links.children[soMucGoc]);
+      }
+      new MutationObserver(chuyen).observe(links, { childList: true });
+      UserLib.renderNavUser();
+      chuyen();
+    })();
+
+    // ----- Hiển thị thông tin -----
+    function veThongTin() {
+      const u = UserLib.getUserFull();
+      $("sideName").textContent = u.hoTen;
+      $("sideEmail").textContent = u.email;
+      $("avatar").textContent = (u.hoTen.trim().charAt(0) || "B").toUpperCase();
+      const d = new Date(u.ngayTao);
+      $("sideSince").textContent = isNaN(d) ? "" : "Thành viên từ " + d.toLocaleDateString("vi-VN");
+      $("txtEmail").value = u.email;
+      $("txtHoTen").value = u.hoTen;
+      $("txtDT").value = u.dienThoai;
+      document.querySelectorAll('input[name="rdGioiTinh"]').forEach(function (r) {
+        r.checked = r.value === u.gioiTinh;
+      });
+    }
+    veThongTin();
+
+    // ----- Chuyển tab -----
+    const tabs = document.querySelectorAll(".side-menu button[data-tab]");
+    function moTab(id) {
+      tabs.forEach(function (b) { b.classList.toggle("active", b.dataset.tab === id); });
+      document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("show", t.id === id); });
+    }
+    tabs.forEach(function (b) { b.addEventListener("click", function () { moTab(b.dataset.tab); }); });
+    if (location.hash === "#orders") moTab("tab-orders");
+
+    function bao(box, text, type) {
+      box.textContent = text;
+      box.className = "msg " + type;
+    }
+
+    // ----- Lưu thông tin cá nhân -----
+    $("frmInfo").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const hoTen = $("txtHoTen").value.trim();
+      const dt = $("txtDT").value.trim();
+      const checked = document.querySelector('input[name="rdGioiTinh"]:checked');
+      if (hoTen.length < 2) return bao($("msgInfo"), "Họ tên phải có ít nhất 2 ký tự.", "error");
+      if (!checked) return bao($("msgInfo"), "Vui lòng chọn giới tính.", "error");
+      if (!/^0\d{9}$/.test(dt)) return bao($("msgInfo"), "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.", "error");
+
+      UserLib.updateProfile({ hoTen: hoTen, gioiTinh: checked.value, dienThoai: dt });
+      veThongTin();
+      bao($("msgInfo"), "Đã cập nhật thông tin thành công!", "success");
+      // vẽ lại "Xin chào, tên" trên menu
+      document.querySelectorAll(".nav-user a, .nav-links a").forEach(function (a) {
+        if (a.textContent.indexOf("Xin chào, ") === 0) a.textContent = "Xin chào, " + hoTen;
+      });
+    });
+
+    // ----- Đổi mật khẩu -----
+    $("frmPass").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const cu = $("txtOld").value, moi = $("txtNew").value, moi2 = $("txtNew2").value;
+      const box = $("msgPass");
+      if (moi.length < 6) return bao(box, "Mật khẩu mới phải có ít nhất 6 ký tự.", "error");
+      if (moi !== moi2) return bao(box, "Mật khẩu xác nhận không khớp.", "error");
+      if (moi === cu) return bao(box, "Mật khẩu mới phải khác mật khẩu hiện tại.", "error");
+      const kq = await UserLib.changePassword(cu, moi);
+      if (kq === "wrong_password") return bao(box, "Mật khẩu hiện tại không đúng.", "error");
+      if (kq !== "ok") return bao(box, "Phiên đăng nhập đã hết, vui lòng đăng nhập lại.", "error");
+      this.reset();
+      bao(box, "Đổi mật khẩu thành công!", "success");
+    });
+
+    // ----- Đơn hàng: đọc các khóa tiembo_order|<mã đơn>|<trường> của chính người dùng -----
+    function layDonHang() {
+      const ds = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k.indexOf("tiembo_order|") !== 0) continue;
+        const p = k.split("|");
+        if (p.length !== 3) continue;
+        if (!ds[p[1]]) ds[p[1]] = { id: p[1] };
+        ds[p[1]][p[2]] = localStorage.getItem(k);
+      }
+      return Object.keys(ds).map(function (k) { return ds[k]; })
+        .filter(function (o) { return o.email === user.email; })
+        .sort(function (a, b) { return Number(b.id) - Number(a.id); });
+    }
+
+    function veDonHang() {
+      const box = $("orderList");
+      const list = layDonHang();
+      box.textContent = "";
+      if (list.length === 0) {
+        const p = document.createElement("p");
+        p.className = "empty";
+        p.append("Bạn chưa có đơn hàng nào. ");
+        const a = document.createElement("a");
+        a.href = "san-pham.html";
+        a.textContent = "Mua sắm ngay";
+        p.appendChild(a);
+        box.appendChild(p);
+        return;
+      }
+      list.forEach(function (o) {
+        const card = document.createElement("div");
+        card.className = "order-card";
+        const add = function (cls, text) {
+          const d = document.createElement("div");
+          d.className = cls;
+          d.textContent = text;
+          card.appendChild(d);
+          return d;
+        };
+        const top = add("order-top", "");
+        const ngay = new Date(o.ngayDat);
+        top.textContent = "Mã đơn: " + o.id + (isNaN(ngay) ? "" : "  •  " + ngay.toLocaleString("vi-VN"));
+        add("order-items", o.sanPham || "");
+        add("order-meta", "Người nhận: " + (o.hoTen || "") + " – " + (o.dienThoai || ""));
+        add("order-meta", "Địa chỉ: " + (o.diaChi || ""));
+        if (o.ghiChu) add("order-meta", "Ghi chú: " + o.ghiChu);
+        add("order-total", "Tổng: " + Number(o.tongTien || 0).toLocaleString("vi-VN") + " VND");
+        box.appendChild(card);
+      });
+    }
+    veDonHang();
+
+    // ----- Đăng xuất -----
+    $("btnLogout").addEventListener("click", function () {
+      UserLib.logout();
+      window.location.href = "sign-in.html";
+    });
+  })();
+</script>
+</body>
+</html>

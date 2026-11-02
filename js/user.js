@@ -14,6 +14,7 @@ const UserLib = (function () {
   const LOGIN_PAGE = "sign-in.html";
   const REGISTER_PAGE = "sign-up.html";
   const ADMIN_PAGE = "quan-tri.html";
+  const ACCOUNT_PAGE = "tai-khoan.html";
 
   /* =====================================================
    *  TIỆN ÍCH
@@ -461,6 +462,36 @@ const UserLib = (function () {
   }
 
   /* =====================================================
+   *  TÀI KHOẢN NGƯỜI DÙNG (dùng cho trang tai-khoan.html)
+   * ===================================================== */
+  // Thông tin đầy đủ của người dùng đang đăng nhập (có cả ngày tạo), hoặc null
+  function getUserFull() {
+    const cur = getCurrentUser();
+    return cur ? findUser(cur.email) : null;
+  }
+
+  // Cập nhật họ tên, giới tính, số điện thoại (email là khóa nên không đổi)
+  function updateProfile(info) {
+    const cur = getCurrentUser();
+    if (!cur) return false;
+    ["hoTen", "gioiTinh", "dienThoai"].forEach(function (f) {
+      localStorage.setItem(userKey(cur.email, f), info[f]);
+      localStorage.setItem(SESSION_KEY + "_" + f, info[f]);
+    });
+    return true;
+  }
+
+  // Trả về: "ok" | "wrong_password" | "not_logged_in"
+  async function changePassword(oldPassword, newPassword) {
+    const cur = getCurrentUser();
+    const user = cur ? findUser(cur.email) : null;
+    if (!user) return "not_logged_in";
+    if (user.password !== (await hashPassword(oldPassword))) return "wrong_password";
+    localStorage.setItem(userKey(cur.email, "password"), await hashPassword(newPassword));
+    return "ok";
+  }
+
+  /* =====================================================
    *  HÀM DÙNG Ở CÁC TRANG KHÁC
    * ===================================================== */
   // Thêm "Xin chào, tên" + Đăng xuất vào menu .nav-links
@@ -481,8 +512,11 @@ const UserLib = (function () {
       };
 
       if (user) {
-        const hello = document.createElement("span");
+        // Bấm vào "Xin chào, tên" -> sang trang tài khoản của người dùng
+        const hello = document.createElement("a");
         hello.textContent = "Xin chào, " + user.hoTen;
+        hello.href = ACCOUNT_PAGE;
+        hello.title = "Xem tài khoản của tôi";
         hello.style.marginLeft = "12px";
         nav.appendChild(hello);
         addLink("Đăng xuất", loginHref || LOGIN_PAGE, logout);
@@ -521,7 +555,7 @@ const UserLib = (function () {
       const user = getCurrentUser();
       if (user) {
         link.textContent = "Xin chào, " + user.hoTen;
-        link.href = "#";
+        link.href = prefix + ACCOUNT_PAGE;   // bấm vào tên -> trang tài khoản
         addLogout(logout);
       } else {
         adminMe().then(function (name) {
@@ -543,5 +577,5 @@ const UserLib = (function () {
     }
   }
 
-  return { initLoginForm, initRegisterForm, getCurrentUser, logout, renderNavUser, renderLoginBar, requireLogin, popup, adminMe, adminLogout };
+  return { initLoginForm, initRegisterForm, getCurrentUser, getUserFull, updateProfile, changePassword, logout, renderNavUser, renderLoginBar, requireLogin, popup, adminMe, adminLogout };
 })();

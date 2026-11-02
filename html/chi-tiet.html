@@ -24,6 +24,7 @@
     <a href="san-pham.html">Sản Phẩm</a>
     <a href="lien-he.html">Liên Hệ</a>
   </div>
+  <div class="nav-user"></div>
 </nav>
 
 
@@ -198,7 +199,20 @@
     buyNow(id);
   }
 
-  if (typeof UserLib !== "undefined") UserLib.renderNavUser();
+  // Đưa "Xin chào / Đăng xuất" sang khung bên phải (.nav-user) để hai mục nằm ngang hàng
+  (function () {
+    var links = document.querySelector(".nav-links");
+    var box = document.querySelector(".nav-user");
+    var soMucGoc = links.children.length; // 4 mục menu gốc
+    function chuyen() {
+      while (links.children.length > soMucGoc) {
+        box.appendChild(links.children[soMucGoc]);
+      }
+    }
+    new MutationObserver(chuyen).observe(links, { childList: true });
+    if (typeof UserLib !== "undefined") UserLib.renderNavUser();
+    chuyen();
+  })();
 </script>
 
 <footer>

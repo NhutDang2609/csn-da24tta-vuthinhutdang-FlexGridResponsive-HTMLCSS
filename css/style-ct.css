@@ -27,9 +27,27 @@ nav {
 .nav-links {
   display: flex;
   gap: 6px;
+  align-items: center;
+  white-space: nowrap;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+}
+
+/* Khung "Xin chào / Đăng xuất" nằm sát góc phải, hai mục cùng một hàng, cùng kiểu */
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  white-space: nowrap;
+  font-size: 15px;
+}
+
+.nav-user span {
+  color: #5C4A3A;
+  font-weight: bold;
+  font-size: 15px;
+  padding: 6px 14px;
 }
 
 .spacer { width: 200px; }
@@ -197,6 +215,12 @@ footer {
     padding: 4px 8px;
   }
 
+  .nav-user {
+    width: 100%;
+    justify-content: flex-start;
+    font-size: 12px;
+  }
+
   #p-image {
     height: 250px !important;
   }
@@ -228,4 +252,3 @@ footer {
     gap: 10px;
   }
 }
-
