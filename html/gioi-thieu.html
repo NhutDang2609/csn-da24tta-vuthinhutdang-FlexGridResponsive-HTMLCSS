@@ -153,6 +153,7 @@ nav {
   color: #5C4A3A;
   font-weight: bold;
   font-size: 15px;
+  padding: 6px 14px;   /* cùng khoảng đệm với nút Đăng xuất */
 }
 
 nav a {
@@ -267,7 +268,7 @@ footer {
   nav { padding: 12px 20px; }
   .nav-brand { font-size: 1.25rem; }
   .nav-links a { font-size: 0.875rem; padding: 6px 10px; }
-  .nav-user, .nav-user span { font-size: 0.875rem; }
+  .nav-user, .nav-user span, .nav-user a { font-size: 0.875rem; }
 }
 
 /* Menu xếp dọc khi màn hình hẹp (tránh chữ đè lên logo) */
@@ -286,7 +287,7 @@ footer {
     gap: 4px;
   }
   .nav-links a { font-size: 12px; padding: 4px 8px; }
-  .nav-user, .nav-user span { width: 100%; justify-content: flex-start; font-size: 12px; }
+  .nav-user { width: 100%; justify-content: flex-start; }
   .footer-links { gap: 10px; }
 }
 
@@ -340,9 +341,10 @@ footer {
     border-top: 1px solid #D4B89A;
   }
 
-  .nav-user a {
+  .nav-user a,
+  .nav-user span {
     padding: 0;
-    font-size: 15px;
+    font-size: 15px;   /* "Xin chào" và "Đăng xuất" cùng một cỡ chữ */
   }
 }
   </style>
