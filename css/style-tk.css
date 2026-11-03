@@ -127,6 +127,26 @@ nav a:hover, nav a.active { background-color: #F5EDE4; }
   margin-bottom: 8px;
 }
 
+.avatar { overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.avatar-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 8px; }
+.btn-small {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 5px 10px;
+  border: 1px solid #D4B89A;
+  border-radius: 999px;
+  background: #FFF8F5;
+  color: #5C4A3A;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-small:hover { background: #E8D5C4; }
+.btn-small.danger { color: #c0636b; border-color: #F7C5CC; }
+.profile-head .msg { font-size: 12px; padding: 6px 10px; margin: 4px 0 6px; }
+
 .profile-name { font-weight: bold; font-size: 17px; color: #6B4F4F; word-break: break-word; }
 .profile-email { font-size: 13px; color: #9C8070; word-break: break-all; }
 .profile-since { font-size: 12px; color: #9C8070; }
@@ -249,7 +269,28 @@ nav a:hover, nav a.active { background-color: #F5EDE4; }
 .order-top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; font-size: 13px; color: #9C8070; }
 .order-items { font-weight: bold; color: #6B4F4F; }
 .order-meta { font-size: 14px; }
-.order-total { align-self: flex-end; font-weight: bold; color: #c0392b; font-size: 17px; }
+.order-total { font-weight: bold; color: #c0392b; font-size: 17px; }
+.order-foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+
+.badge { padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: bold; background: #d1e7dd; color: #0f5132; }
+.badge.cancelled { background: #e9ecef; color: #6c757d; }
+
+.btn-cancel {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 7px 16px;
+  border: 1px solid #c0636b;
+  border-radius: 8px;
+  background: transparent;
+  color: #c0636b;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-cancel:hover { background: #fff0f0; }
+
+.order-card.cancelled { opacity: 0.75; background: #f4f1ee; }
+.order-card.cancelled .order-total { text-decoration: line-through; color: #9C8070; }
 .empty { text-align: center; color: #9C8070; padding: 24px 0; }
 .empty a { color: #5C4A3A; font-weight: bold; }
 

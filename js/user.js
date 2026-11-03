@@ -491,6 +491,24 @@ const UserLib = (function () {
     return "ok";
   }
 
+  // Ảnh đại diện: lưu dạng chuỗi dữ liệu ảnh (data URL) riêng cho từng người dùng
+  function getAvatar() {
+    const cur = getCurrentUser();
+    return cur ? (localStorage.getItem(userKey(cur.email, "avatar")) || "") : "";
+  }
+  function setAvatar(dataUrl) {
+    const cur = getCurrentUser();
+    if (!cur) return false;
+    try {
+      localStorage.setItem(userKey(cur.email, "avatar"), dataUrl);
+      return true;
+    } catch (e) { return false; }   // bộ nhớ trình duyệt đầy
+  }
+  function removeAvatar() {
+    const cur = getCurrentUser();
+    if (cur) localStorage.removeItem(userKey(cur.email, "avatar"));
+  }
+
   /* =====================================================
    *  HÀM DÙNG Ở CÁC TRANG KHÁC
    * ===================================================== */
@@ -577,5 +595,5 @@ const UserLib = (function () {
     }
   }
 
-  return { initLoginForm, initRegisterForm, getCurrentUser, getUserFull, updateProfile, changePassword, logout, renderNavUser, renderLoginBar, requireLogin, popup, adminMe, adminLogout };
+  return { initLoginForm, initRegisterForm, getCurrentUser, getUserFull, updateProfile, changePassword, getAvatar, setAvatar, removeAvatar, logout, renderNavUser, renderLoginBar, requireLogin, popup, adminMe, adminLogout };
 })();

@@ -33,6 +33,12 @@
     <aside class="card profile-side">
       <div class="profile-head">
         <div class="avatar" id="avatar">B</div>
+        <div class="avatar-actions">
+          <label class="btn-small" for="fAvatar">📷 Đổi ảnh</label>
+          <button type="button" class="btn-small danger" id="btnAvatarDel">Xóa ảnh</button>
+          <input type="file" id="fAvatar" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+        </div>
+        <div class="msg" id="msgAvatar"></div>
         <div class="profile-name" id="sideName"></div>
         <div class="profile-email" id="sideEmail"></div>
         <div class="profile-since" id="sideSince"></div>
@@ -145,12 +151,77 @@
       chuyen();
     })();
 
+    // ----- Ảnh đại diện: có ảnh thì hiện ảnh, chưa có thì hiện chữ cái đầu của tên -----
+    function veAvatar(u) {
+      const box = $("avatar");
+      const src = UserLib.getAvatar();
+      box.textContent = "";
+      if (src) {
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "Ảnh đại diện";
+        box.appendChild(img);
+      } else {
+        box.textContent = ((u || UserLib.getUserFull()).hoTen.trim().charAt(0) || "B").toUpperCase();
+      }
+      $("btnAvatarDel").style.display = src ? "" : "none";
+    }
+
+    // Cắt vuông ở giữa, thu nhỏ còn 256x256 rồi đổi thành chuỗi để lưu trong trình duyệt
+    function thuNhoAnh(file) {
+      return new Promise(function (resolve, reject) {
+        if (!/^image\//.test(file.type)) return reject(new Error("File đã chọn không phải ảnh."));
+        if (file.size > 5 * 1024 * 1024) return reject(new Error("Ảnh quá lớn (tối đa 5MB)."));
+        const reader = new FileReader();
+        reader.onerror = function () { reject(new Error("Không đọc được ảnh.")); };
+        reader.onload = function () {
+          const img = new Image();
+          img.onerror = function () { reject(new Error("File ảnh không hợp lệ.")); };
+          img.onload = function () {
+            const S = 256;
+            const canh = Math.min(img.width, img.height);
+            const sx = (img.width - canh) / 2, sy = (img.height - canh) / 2;
+            const c = document.createElement("canvas");
+            c.width = S; c.height = S;
+            const ctx = c.getContext("2d");
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(0, 0, S, S);
+            ctx.drawImage(img, sx, sy, canh, canh, 0, 0, S, S);
+            resolve(c.toDataURL("image/jpeg", 0.85));
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    $("fAvatar").addEventListener("change", async function () {
+      const f = this.files[0];
+      if (!f) return;
+      const box = $("msgAvatar");
+      try {
+        const data = await thuNhoAnh(f);
+        if (!UserLib.setAvatar(data)) throw new Error("Không lưu được ảnh (bộ nhớ trình duyệt đã đầy).");
+        veAvatar();
+        bao(box, "Đã cập nhật ảnh đại diện!", "success");
+      } catch (err) {
+        bao(box, err.message, "error");
+      }
+      this.value = "";
+    });
+
+    $("btnAvatarDel").addEventListener("click", function () {
+      UserLib.removeAvatar();
+      veAvatar();
+      bao($("msgAvatar"), "Đã xóa ảnh đại diện.", "success");
+    });
+
     // ----- Hiển thị thông tin -----
     function veThongTin() {
       const u = UserLib.getUserFull();
       $("sideName").textContent = u.hoTen;
       $("sideEmail").textContent = u.email;
-      $("avatar").textContent = (u.hoTen.trim().charAt(0) || "B").toUpperCase();
+      veAvatar(u);
       const d = new Date(u.ngayTao);
       $("sideSince").textContent = isNaN(d) ? "" : "Thành viên từ " + d.toLocaleDateString("vi-VN");
       $("txtEmail").value = u.email;
@@ -226,6 +297,14 @@
         .sort(function (a, b) { return Number(b.id) - Number(a.id); });
     }
 
+    // Hủy đơn: chỉ đánh dấu trạng thái "Đã hủy", đơn vẫn còn trong lịch sử
+    function huyDon(o) {
+      if (!confirm("Bạn có chắc muốn hủy đơn hàng " + o.id + " không?\nThao tác này không thể hoàn tác.")) return;
+      localStorage.setItem("tiembo_order|" + o.id + "|trangThai", "Đã hủy");
+      localStorage.setItem("tiembo_order|" + o.id + "|ngayHuy", new Date().toISOString());
+      veDonHang();
+    }
+
     function veDonHang() {
       const box = $("orderList");
       const list = layDonHang();
@@ -251,14 +330,43 @@
           card.appendChild(d);
           return d;
         };
-        const top = add("order-top", "");
+        const daHuy = o.trangThai === "Đã hủy";
+        if (daHuy) card.classList.add("cancelled");
+
+        const top = document.createElement("div");
+        top.className = "order-top";
         const ngay = new Date(o.ngayDat);
-        top.textContent = "Mã đơn: " + o.id + (isNaN(ngay) ? "" : "  •  " + ngay.toLocaleString("vi-VN"));
+        const trai = document.createElement("span");
+        trai.textContent = "Mã đơn: " + o.id + (isNaN(ngay) ? "" : "  •  " + ngay.toLocaleString("vi-VN"));
+        const badge = document.createElement("span");
+        badge.className = "badge" + (daHuy ? " cancelled" : "");
+        badge.textContent = daHuy ? "Đã hủy" : "Đang xử lý";
+        top.append(trai, badge);
+        card.appendChild(top);
+
         add("order-items", o.sanPham || "");
         add("order-meta", "Người nhận: " + (o.hoTen || "") + " – " + (o.dienThoai || ""));
         add("order-meta", "Địa chỉ: " + (o.diaChi || ""));
         if (o.ghiChu) add("order-meta", "Ghi chú: " + o.ghiChu);
-        add("order-total", "Tổng: " + Number(o.tongTien || 0).toLocaleString("vi-VN") + " VND");
+        if (daHuy && o.ngayHuy && !isNaN(new Date(o.ngayHuy))) {
+          add("order-meta", "Đã hủy lúc: " + new Date(o.ngayHuy).toLocaleString("vi-VN"));
+        }
+
+        const foot = document.createElement("div");
+        foot.className = "order-foot";
+        const tong = document.createElement("div");
+        tong.className = "order-total";
+        tong.textContent = "Tổng: " + Number(o.tongTien || 0).toLocaleString("vi-VN") + " VND";
+        foot.appendChild(tong);
+        if (!daHuy) {
+          const nut = document.createElement("button");
+          nut.type = "button";
+          nut.className = "btn-cancel";
+          nut.textContent = "Hủy đơn hàng";
+          nut.addEventListener("click", function () { huyDon(o); });
+          foot.appendChild(nut);
+        }
+        card.appendChild(foot);
         box.appendChild(card);
       });
     }
