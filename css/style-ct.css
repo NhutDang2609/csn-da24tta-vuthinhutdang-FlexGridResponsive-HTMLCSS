@@ -67,10 +67,14 @@ nav a:hover, nav a.active {
 }
 
 .container {
+  flex: 1 0 auto;          /* đẩy chân trang xuống đáy khi nội dung ngắn */
+  width: 100%;
   max-width: 900px;
   margin: 40px auto;
   padding: 0 20px;
 }
+
+#p-desc { overflow-wrap: anywhere; }
 
 #p-image {
   border: 2px solid #F7C5CC;
@@ -221,8 +225,11 @@ footer {
     font-size: 12px;
   }
 
+  /* Ảnh: tỷ lệ 4:3, tối đa 420px cao (ghi đè chiều cao 350px khai báo trong HTML) */
   #p-image {
-    height: 250px !important;
+    height: auto !important;
+    aspect-ratio: 4 / 3;
+    max-height: 420px;
   }
 
   #p-name {
@@ -243,12 +250,48 @@ footer {
     text-align: center;
   }
 
+  /* Giỏ hàng: nút tròn nổi ở góc dưới bên phải (vùng ngón cái dễ chạm) */
+  .cart-fab {
+    top: auto !important;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    right: 16px !important;
+  }
+
+  .cart-fab > div:first-child {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px !important;
+  }
+
+  /* Hộp giỏ hàng mở lên phía trên nút, rộng theo màn hình */
   #popup {
-    width: 160px !important;
+    top: auto !important;
+    bottom: 64px;
+    right: 0 !important;
+    margin-top: 0 !important;
+    width: min(88vw, 340px) !important;
+    max-height: 65vh !important;
+  }
+
+  .btn-danger,
+  .btn-success {
+    min-height: 44px;
   }
 
   .footer-links {
     flex-wrap: wrap;
     gap: 10px;
   }
+}
+
+/* Điện thoại nhỏ */
+@media (max-width: 576px) {
+  .container { margin: 20px auto; padding: 0 12px 84px; }   /* chừa chỗ cho nút giỏ hàng nổi */
+  .container .col-md-7 { padding: 16px !important; }
 }

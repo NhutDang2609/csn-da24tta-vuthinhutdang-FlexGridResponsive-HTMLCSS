@@ -2,6 +2,20 @@
    Trang ĐĂNG KÝ — Tiệm của Bơ
    ===================================================================== */
 
+/* ===== 0. Phông chữ chung =====
+   Một bộ phông duy nhất cho cả trang; ô nhập, nút và nhãn kế thừa lại
+   (trình duyệt mặc định KHÔNG kế thừa phông chữ cho các phần tử này). */
+:root { --font-main: Arial, sans-serif; }   /* trùng với style-nav.css và các trang khác */
+
+html {
+  -webkit-text-size-adjust: 100%;   /* iPhone không tự phóng to chữ khi xoay ngang */
+  text-size-adjust: 100%;
+}
+
+input, button, select, textarea, label {
+  font-family: inherit;
+}
+
 /* ===== 1. Khung trang (footer luôn nằm dưới đáy) ===== */
 * { box-sizing: border-box; }
 
@@ -9,7 +23,7 @@ body {
   margin: 0;
   background-color: #FAF6F1;
   color: #5C4A3A;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-main);
   font-size: 16px;
   line-height: 1.6;
   min-height: 100vh;
@@ -102,10 +116,12 @@ nav a:hover, nav a.active { background-color: #F5EDE4; }
 }
 
 .form-group > label {
-  font-size: 13px;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 700;
   color: #8B5E5E;
 }
+
+.form-group > label b { font-weight: inherit; }   /* tránh đậm chồng đậm (900) */
 
 /* Ô nhập chữ (không áp dụng cho nút tròn giới tính) */
 .form-group input:not([type="radio"]) {
@@ -113,15 +129,21 @@ nav a:hover, nav a.active { background-color: #F5EDE4; }
   padding: 11px 14px;
   border: 1.5px solid #F7C5CC;
   border-radius: 10px;
-  font-size: 14px;
-  font-family: Arial, sans-serif;
+  font-size: 15px;
+  font-family: inherit;
+  line-height: 1.4;
   color: #6B4F4F;
   background: #FFF8F5;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-.form-group input:not([type="radio"])::placeholder { color: #BFA9A9; }
+.form-group input:not([type="radio"])::placeholder {
+  color: #BFA9A9;
+  font-family: inherit;
+  font-size: inherit;
+  opacity: 1;
+}
 
 .form-group input:not([type="radio"]):focus {
   border-color: #E39AA6;
@@ -146,13 +168,13 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 41px;              /* cao bằng các ô nhập bên cạnh */
+  height: 43px;              /* cao bằng các ô nhập bên cạnh */
   padding: 0 14px;
   border: 1.5px solid #F7C5CC;
   border-radius: 999px;
   background: #FFF8F5;
   color: #6B4F4F;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: normal;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
@@ -173,7 +195,8 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
   border: 2px solid #D4B89A;
   border-radius: 10px;
   color: #5C4A3A;
-  font-weight: bold;
+  font-family: inherit;
+  font-weight: 700;
   font-size: 16px;
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
@@ -255,4 +278,6 @@ footer {
   .container { margin: 18px auto 32px; padding: 0 12px; }
   #frmRegister { padding: 22px 18px 20px; grid-template-columns: 1fr; }
   #frmRegister > .half { grid-column: 1 / -1; }
+  .rdgioitinh label { font-size: 16px; height: 46px; }
+  .form-group > label { font-size: 15px; }
 }
