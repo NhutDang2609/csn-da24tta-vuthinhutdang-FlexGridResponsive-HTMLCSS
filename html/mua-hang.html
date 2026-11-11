@@ -7,7 +7,13 @@
   <link rel="stylesheet" href="../css/style-sp.css">
 
     <style>
-      .order-wrap { max-width: 760px; margin: 20px auto; padding: 0 16px; }
+      .order-wrap {
+        width: 100%;            /* body là flex container dọc: nếu thiếu dòng này, khung co lại vừa nội dung (cả khi thanh toán giỏ hàng) */
+        max-width: 760px;
+        margin: 20px auto;
+        padding: 0 16px;
+        flex: 1 0 auto;         /* chân trang luôn sát đáy */
+      }
       .order-box { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 20px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
       .order-box h4 { margin: 0 0 14px; }
       .order-product { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }

@@ -415,7 +415,7 @@
     (async function () {
       const name = await UserLib.adminMe();
       if (!name) return toLogin();
-      $("adminName").textContent = "👤 " + name;
+      $("adminName").textContent = " Quản trị";   // không hiện email quản trị trên thanh điều hướng
       $("adminPage").style.display = "block";
       taiDanhSach();
     })();
