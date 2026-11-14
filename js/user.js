@@ -542,7 +542,7 @@ const UserLib = (function () {
         adminMe().then(function (name) {
           if (!name) return;
           addLink("⚙️ Quản trị", ADMIN_PAGE);
-          addLink("Đăng xuất (" + name + ")", loginHref || LOGIN_PAGE, adminLogout);
+          addLink("Đăng xuất", loginHref || LOGIN_PAGE, adminLogout);   // không hiện email quản trị
         });
       }
     });
@@ -578,7 +578,7 @@ const UserLib = (function () {
       } else {
         adminMe().then(function (name) {
           if (!name) return;
-          link.textContent = "⚙️ Quản trị (" + name + ")";
+          link.textContent = "⚙️ Quản trị";   // không hiện email quản trị
           link.href = prefix + ADMIN_PAGE;
           addLogout(adminLogout);
         });
